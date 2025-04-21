@@ -30,9 +30,9 @@ export const createTask = createAsyncThunk("task/create", async(taskData) => {
 
 //fetch Task
 
-export const fetchTask = createAsyncThunk("task/fetch", async() => {
+export const fetchTask = createAsyncThunk("task/fetch", async(query) => {
   try {
-    const response = await axios.get(`${apiUrl}`,{headers:headers()})
+    const response = await axios.get(`${apiUrl}${query||""}`,{headers:headers()})
     return response.data
   }
   catch (error)
@@ -60,6 +60,10 @@ const taskSlice = createSlice({
   name: "taskState",
   initialState,
   reducers: {
+     resetTaskCreateMessage: (state) => {
+      state.taskCreateMessage = null
+      state.taskCreateError = null
+    }
   },
   extraReducers: (builder) => {
 
@@ -100,4 +104,4 @@ const taskSlice = createSlice({
 
 export default taskSlice.reducer
 
-export const {} = taskSlice.actions
+export const {resetTaskCreateMessage} = taskSlice.actions

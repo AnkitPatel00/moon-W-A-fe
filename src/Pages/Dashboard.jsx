@@ -10,7 +10,11 @@ import { useSearchParams } from "react-router-dom";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import { fetchTeams } from "../../features/team/teamSlice";
-import { createTask, fetchTask } from "../../features/task/taskSlice";
+import {
+  createTask,
+  fetchTask,
+  resetTaskCreateMessage,
+} from "../../features/task/taskSlice";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -22,8 +26,10 @@ const Dashboard = () => {
   const [search, setSearch] = useState(searchProjectQuery || "");
 
   const statusProjectQuery = searchParams.get("projectStatus");
+  const statusTaskQuery = searchParams.get("taskStatus");
 
   const [projectFilter, setProjectFilter] = useState(statusProjectQuery || "");
+  const [taskFilter, setTaskFilter] = useState(statusTaskQuery || "");
 
   useEffect(() => {
     setSearchParams(
@@ -39,11 +45,16 @@ const Dashboard = () => {
         } else {
           params.delete("projectStatus");
         }
+        if (taskFilter) {
+          params.set("taskStatus", taskFilter);
+        } else {
+          params.delete("taskStatus");
+        }
         return params;
       },
       { replace: true }
     );
-  }, [search, projectFilter]);
+  }, [search, projectFilter, taskFilter]);
 
   const {
     projects,
@@ -54,7 +65,8 @@ const Dashboard = () => {
 
   const { allUsers } = useSelector((state) => state.userState);
   const { teams } = useSelector((state) => state.teamState);
-  const { tasks, taskCreateState } = useSelector((state) => state.taskState);
+  const { tasks, taskCreateState, taskCreateMessage, taskCreateError } =
+    useSelector((state) => state.taskState);
 
   const [isnewProject, setisNewProject] = useState(false);
 
@@ -105,6 +117,15 @@ const Dashboard = () => {
     });
   };
 
+  const handleTaskFormReset = () => {
+    setTaskFormData({
+      ...initialTaskData,
+      project: projects[projects.length - 1]._id,
+      team: teams[teams.length - 1]._id,
+    });
+    setSelectedOwner([]);
+  };
+
   useEffect(() => {
     if (localStorage.getItem("accessToken")) {
       dispatch(fetchUser());
@@ -115,6 +136,14 @@ const Dashboard = () => {
     }
     if (taskCreateState === "success") {
       dispatch(fetchTask());
+
+      handleTaskFormReset();
+      // setTaskFormData({
+      //   ...initialTaskData,
+      //   project: projects[projects.length - 1]._id,
+      //   team: teams[teams.length - 1]._id,
+      // });
+      // setSelectedOwner([]);
     }
   }, [projectCreateState, taskCreateState]);
 
@@ -156,8 +185,6 @@ const Dashboard = () => {
       </>
     );
   };
-
-  console.log(tasks);
 
   const TaskList = () => {
     return (
@@ -238,6 +265,13 @@ const Dashboard = () => {
       }, 1000);
     } else {
       dispatch(fetchProject());
+    }
+
+    if (taskFilter) {
+      t = setTimeout(() => {
+        dispatch(fetchTask(`?${searchParams.toString()}`));
+      }, 1000);
+    } else {
       dispatch(fetchTask());
     }
 
@@ -310,8 +344,16 @@ const Dashboard = () => {
         <div className="d-flex justify-content-between align-items-center flex-wrap">
           <div className="d-flex align-items-center">
             <h5 className="mb-0 me-3 fs-4">My Tasks</h5>
-            <select className="form-select" style={{ width: "150px" }}>
-              <option value="">Filter</option>
+            <label htmlFor="task-status-filter" className="me-3">
+              Status Filter:
+            </label>
+            <select
+              className="form-select"
+              style={{ width: "150px" }}
+              id="task-status-filter"
+              onChange={(e) => setTaskFilter(e.target.value)}
+            >
+              <option value="">All</option>
               <option value="To Do">To Do</option>
               <option value="In Progress">In Progress</option>
               <option value="Completed">Completed</option>
@@ -328,7 +370,7 @@ const Dashboard = () => {
           </button>
         </div>
       </div>
-      <div className="row gap-3">
+      <div className="row gap-3 mx-3">
         <TaskList />
       </div>
 
@@ -547,17 +589,31 @@ const Dashboard = () => {
                   </div>
                 </div>
 
+                {taskCreateError && (
+                  <p className="text-danger my-2">{taskCreateError}</p>
+                )}
+                {taskCreateMessage && (
+                  <p className="text-info my-2">{taskCreateMessage}</p>
+                )}
+
                 <div className="mt-4 d-flex justify-content-end gap-3">
                   <button
                     onClick={(e) => {
                       e.preventDefault();
                       setisNewTask(false);
+                      handleTaskFormReset();
+                      dispatch(resetTaskCreateMessage());
                     }}
                     className="btn btn-secondary"
                   >
                     Cancel
                   </button>
-                  <button className="btn btn-primary">Create</button>
+                  <button
+                    disabled={taskCreateMessage === "loading"}
+                    className="btn btn-primary"
+                  >
+                    {taskCreateMessage === "loading" ? "Creating..." : "Create"}
+                  </button>
                 </div>
               </form>
             </div>
