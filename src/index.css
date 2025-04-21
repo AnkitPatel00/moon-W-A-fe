@@ -1,0 +1,39 @@
+.login-form{
+  padding: 30px;
+  width: 500px;
+}
+
+.login-form-container{
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* project form */
+
+.project-form{
+  width: 500px;
+  border: 1px solid rgb(129, 122, 122);
+  padding: 30px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  background-color: white;
+}
+
+/* overlay */
+
+.overlay{
+   background-color: rgba(0, 0, 0, 0.5);
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+}

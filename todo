@@ -1,0 +1,14 @@
+1.Signup: done
+2.Login: done
+3.Authentication Handling: done (stored Token)
+
+2.Team & User Roles
+Goals: Group users and assign roles (e.g., Admin, Member)
+
+ Backend:
+
+Create Team model
+
+Add/remove users from teams
+
+Assign roles (optional)
