@@ -15,6 +15,8 @@ import Team from "./Pages/Team.jsx";
 import Reports from "./Pages/Reports.jsx";
 import Setting from "./Pages/Setting.jsx";
 import LoginRouteProtect from "./Component/LoginRouteProtect.jsx";
+import ProjectDetails from "./Pages/ProjectDetails.jsx";
+import TaskDetails from "./Pages/TaskDetails.jsx";
 
 const router = createBrowserRouter([
   {
@@ -33,6 +35,14 @@ const router = createBrowserRouter([
       {
         path: "/project",
         element: <Project />,
+      },
+      {
+        path: "/project-details/:projectId",
+        element: <ProjectDetails />,
+      },
+      {
+        path: "/task-details/:taskId",
+        element: <TaskDetails />,
       },
       {
         path: "/team",

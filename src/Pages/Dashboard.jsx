@@ -6,15 +6,17 @@ import {
   fetchProject,
   resetprojectCreateMessage,
 } from "../../features/project/projectSlice";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import { fetchTeams } from "../../features/team/teamSlice";
 import {
+  clearTask,
   createTask,
   fetchTask,
   resetTaskCreateMessage,
 } from "../../features/task/taskSlice";
+import TaskList from "../Component/TaskList";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -63,7 +65,6 @@ const Dashboard = () => {
     projectCreateError,
   } = useSelector((state) => state.projectState);
 
-  const { allUsers } = useSelector((state) => state.userState);
   const { teams } = useSelector((state) => state.teamState);
   const { tasks, taskCreateState, taskCreateMessage, taskCreateError } =
     useSelector((state) => state.taskState);
@@ -136,14 +137,7 @@ const Dashboard = () => {
     }
     if (taskCreateState === "success") {
       dispatch(fetchTask());
-
       handleTaskFormReset();
-      // setTaskFormData({
-      //   ...initialTaskData,
-      //   project: projects[projects.length - 1]._id,
-      //   team: teams[teams.length - 1]._id,
-      // });
-      // setSelectedOwner([]);
     }
   }, [projectCreateState, taskCreateState]);
 
@@ -179,73 +173,12 @@ const Dashboard = () => {
               </p>
               <h5 className="fs-4">{project.name}</h5>
               <p>{project.description.slice(0, 55) + "..."}</p>
-            </div>
-          );
-        })}
-      </>
-    );
-  };
-
-  const TaskList = () => {
-    return (
-      <>
-        {tasks?.toReversed().map((task) => {
-          const statusBG =
-            task.status === "To Do"
-              ? "bg-secondary text-light"
-              : task.status === "In Progress"
-              ? "bg-info text-light"
-              : task.status === "Completed"
-              ? "bg-success text-light"
-              : task.status === "Blocked"
-              ? "bg-danger text-light"
-              : "";
-
-          return (
-            <div key={task._id} className="col-md-3 border p-4">
-              <p>
-                <span className={`${statusBG} px-2 py-1 rounded`}>
-                  {task.status}
-                </span>
-              </p>
-              <h5 className="fs-4">{task.name}</h5>
-              <div class="d-flex align-items-center">
-                {task.owners.map((owner, i) => {
-                  const bgColor =
-                    i == 0
-                      ? "text-bg-primary"
-                      : i == 1
-                      ? "text-bg-secondary"
-                      : i == 2
-                      ? "text-bg-success"
-                      : i == 3
-                      ? "text-bg-danger"
-                      : i == 4
-                      ? "text-bg-warning"
-                      : i == 5
-                      ? "text-bg-info"
-                      : "text-bg-dark";
-
-                  return (
-                    <div
-                      className={`rounded-circle ${bgColor} d-flex justify-content-center align-items-center`}
-                      style={{
-                        width: "40px",
-                        height: "40px",
-                        fontWeight: "bold",
-                        fontSize: "16px",
-                        zIndex: `${i}`,
-                        position: "relative",
-                        left: `${-i}0px`,
-                      }}
-                    >
-                      {owner.name ? owner.name.charAt(0) : ""}
-                    </div>
-                  );
-                })}
-              </div>
-              <p>Due on: {task.dueDate}</p>
-              <p></p>
+              <Link
+                className="btn btn-primary btn-sm"
+                to={`/project-details/${project._id}`}
+              >
+                See Details
+              </Link>
             </div>
           );
         })}
@@ -272,6 +205,7 @@ const Dashboard = () => {
         dispatch(fetchTask(`?${searchParams.toString()}`));
       }, 1000);
     } else {
+      dispatch(clearTask());
       dispatch(fetchTask());
     }
 
@@ -285,6 +219,7 @@ const Dashboard = () => {
       ...taskFormData,
       tags: taskFormData.tags.map(({ value }) => value),
       owners: selectedOwner.map(({ value }) => value),
+      completedAt: taskFormData.status === "Completed" ? Date.now() : null,
     };
 
     if (
@@ -371,7 +306,7 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="row gap-3 mx-3">
-        <TaskList />
+        <TaskList tasks={tasks} />
       </div>
 
       {/* create project */}
