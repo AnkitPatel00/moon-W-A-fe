@@ -17,6 +17,7 @@ import Setting from "./Pages/Setting.jsx";
 import LoginRouteProtect from "./Component/LoginRouteProtect.jsx";
 import ProjectDetails from "./Pages/ProjectDetails.jsx";
 import TaskDetails from "./Pages/TaskDetails.jsx";
+import TeamDetails from "./Pages/TeamDetails.jsx";
 
 const router = createBrowserRouter([
   {
@@ -47,6 +48,10 @@ const router = createBrowserRouter([
       {
         path: "/team",
         element: <Team />,
+      },
+      {
+        path: "/team-details/:teamId",
+        element: <TeamDetails />,
       },
       {
         path: "/report",

@@ -17,6 +17,7 @@ import {
   resetTaskCreateMessage,
 } from "../../features/task/taskSlice";
 import TaskList from "../Component/TaskList";
+import ProjectList from "../Component/ProjectList";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -153,38 +154,38 @@ const Dashboard = () => {
     }
   };
 
-  const ProjectList = () => {
-    return (
-      <>
-        {projects?.toReversed().map((project) => {
-          const statusBG =
-            project.status === "Active"
-              ? "badge bg-success"
-              : project.status === "Completed"
-              ? "badge bg-primary"
-              : "badge bg-warning text-dark";
+  // const ProjectList = () => {
+  //   return (
+  //     <>
+  //       {projects?.toReversed().map((project) => {
+  //         const statusBG =
+  //           project.status === "Active"
+  //             ? "badge bg-success"
+  //             : project.status === "Completed"
+  //             ? "badge bg-primary"
+  //             : "badge bg-warning text-dark";
 
-          return (
-            <div key={project._id} className="col-md-3 border bg-light p-4">
-              <p>
-                <span className={`${statusBG} px-2 py-1 rounded`}>
-                  {project.status}
-                </span>
-              </p>
-              <h5 className="fs-4">{project.name}</h5>
-              <p>{project.description.slice(0, 55) + "..."}</p>
-              <Link
-                className="btn btn-primary btn-sm"
-                to={`/project-details/${project._id}`}
-              >
-                See Details
-              </Link>
-            </div>
-          );
-        })}
-      </>
-    );
-  };
+  //         return (
+  //           <div key={project._id} className="col-md-3 border bg-light p-4">
+  //             <p>
+  //               <span className={`${statusBG} px-2 py-1 rounded`}>
+  //                 {project.status}
+  //               </span>
+  //             </p>
+  //             <h5 className="fs-4">{project.name}</h5>
+  //             <p>{project.description.slice(0, 55) + "..."}</p>
+  //             <Link
+  //               className="btn btn-primary btn-sm"
+  //               to={`/project-details/${project._id}`}
+  //             >
+  //               See Details
+  //             </Link>
+  //           </div>
+  //         );
+  //       })}
+  //     </>
+  //   );
+  // };
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
@@ -268,12 +269,12 @@ const Dashboard = () => {
             onClick={() => setisNewProject(true)}
             className="btn btn-primary mt-2 mt-md-0"
           >
-            New Project
+            + New Project
           </button>
         </div>
       </div>
       <div className="row gap-3 mx-3">
-        <ProjectList />
+        {projects.length > 0 && <ProjectList projects={projects} />}
       </div>
       <div className="my-4">
         <div className="d-flex justify-content-between align-items-center flex-wrap">
@@ -301,12 +302,12 @@ const Dashboard = () => {
             }}
             className="btn btn-primary mt-2 mt-md-0"
           >
-            New Task
+            + New Task
           </button>
         </div>
       </div>
       <div className="row gap-3 mx-3">
-        <TaskList tasks={tasks} />
+        {tasks.length > 0 && <TaskList tasks={tasks} />}
       </div>
 
       {/* create project */}
