@@ -1,26 +1,26 @@
 import { useEffect, useState } from "react";
-import { fetchAllUser, fetchUser } from "../../features/user/userSlice";
+import { fetchUser } from "../../features/user/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  createProject,
   fetchProject,
-  resetprojectCreateMessage,
+  setisProjectForm,
 } from "../../features/project/projectSlice";
-import { Link, useSearchParams } from "react-router-dom";
-import Select from "react-select";
-import CreatableSelect from "react-select/creatable";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
 import { fetchTeams } from "../../features/team/teamSlice";
 import {
   clearTask,
-  createTask,
   fetchTask,
-  resetTaskCreateMessage,
+  setisTaskForm,
 } from "../../features/task/taskSlice";
 import TaskList from "../Component/TaskList";
 import ProjectList from "../Component/ProjectList";
+import NewProjectForm from "../Component/newProjectForm";
+import NewTaskForm from "../Component/NewTaskForm";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -61,72 +61,21 @@ const Dashboard = () => {
 
   const {
     projects,
+    isProjectForm,
     projectCreateState,
     projectCreateMessage,
     projectCreateError,
   } = useSelector((state) => state.projectState);
 
-  const { teams } = useSelector((state) => state.teamState);
-  const { tasks, taskCreateState, taskCreateMessage, taskCreateError } =
-    useSelector((state) => state.taskState);
+  console.log(projects);
 
-  const [isnewProject, setisNewProject] = useState(false);
-
-  const [isnewTask, setisNewTask] = useState(false);
-
-  const initialProjectData = { name: "", status: "Active", description: "" };
-  const [projectFormData, setPorjectFormData] = useState(initialProjectData);
-
-  const initialTaskData = {
-    project: [],
-    name: "",
-    team: [],
-    status: "To Do",
-    tags: [],
-    dueDate: "",
-    timeToComplete: "",
-  };
-  const [taskFormData, setTaskFormData] = useState(initialTaskData);
-  const [selectedOwner, setSelectedOwner] = useState([]);
-
-  useEffect(() => {
-    setSelectedOwner([]);
-  }, [taskFormData.team]);
-
-  useEffect(() => {
-    if (projects.length > 0) {
-      setTaskFormData((prev) => ({
-        ...prev,
-        project: projects[projects.length - 1]._id,
-      }));
-    }
-
-    if (teams.length > 0) {
-      setTaskFormData((prev) => ({
-        ...prev,
-        team: teams[teams.length - 1]._id,
-      }));
-    }
-  }, [projects, teams]);
-
-  const handleTaskForm = (e) => {
-    const { name, value } = e.target;
-    setTaskFormData((prev) => ({ ...prev, [name]: value }));
-  };
-  const handleTag = (newValue) => {
-    setTaskFormData((prev) => {
-      return { ...prev, tags: newValue };
-    });
-  };
-
-  const handleTaskFormReset = () => {
-    setTaskFormData({
-      ...initialTaskData,
-      project: projects[projects.length - 1]._id,
-      team: teams[teams.length - 1]._id,
-    });
-    setSelectedOwner([]);
-  };
+  const {
+    tasks,
+    isTaskForm,
+    taskCreateState,
+    taskCreateMessage,
+    taskCreateError,
+  } = useSelector((state) => state.taskState);
 
   useEffect(() => {
     if (localStorage.getItem("accessToken")) {
@@ -138,54 +87,8 @@ const Dashboard = () => {
     }
     if (taskCreateState === "success") {
       dispatch(fetchTask());
-      handleTaskFormReset();
     }
   }, [projectCreateState, taskCreateState]);
-
-  const handleProjectForm = (e) => {
-    const { id, value } = e.target;
-    setPorjectFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const handleProjectFormSubmit = (e) => {
-    e.preventDefault();
-    if (projectFormData.name) {
-      dispatch(createProject(projectFormData));
-    }
-  };
-
-  // const ProjectList = () => {
-  //   return (
-  //     <>
-  //       {projects?.toReversed().map((project) => {
-  //         const statusBG =
-  //           project.status === "Active"
-  //             ? "badge bg-success"
-  //             : project.status === "Completed"
-  //             ? "badge bg-primary"
-  //             : "badge bg-warning text-dark";
-
-  //         return (
-  //           <div key={project._id} className="col-md-3 border bg-light p-4">
-  //             <p>
-  //               <span className={`${statusBG} px-2 py-1 rounded`}>
-  //                 {project.status}
-  //               </span>
-  //             </p>
-  //             <h5 className="fs-4">{project.name}</h5>
-  //             <p>{project.description.slice(0, 55) + "..."}</p>
-  //             <Link
-  //               className="btn btn-primary btn-sm"
-  //               to={`/project-details/${project._id}`}
-  //             >
-  //               See Details
-  //             </Link>
-  //           </div>
-  //         );
-  //       })}
-  //     </>
-  //   );
-  // };
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
@@ -206,36 +109,16 @@ const Dashboard = () => {
         dispatch(fetchTask(`?${searchParams.toString()}`));
       }, 1000);
     } else {
-      dispatch(clearTask());
+      // dispatch(clearTask());
       dispatch(fetchTask());
     }
 
     return () => clearTimeout(t);
   }, [searchParams]);
 
-  const handleTaskFormSubmit = (e) => {
-    e.preventDefault();
-
-    const taskData = {
-      ...taskFormData,
-      tags: taskFormData.tags.map(({ value }) => value),
-      owners: selectedOwner.map(({ value }) => value),
-      completedAt: taskFormData.status === "Completed" ? Date.now() : null,
-    };
-
-    if (
-      taskData.name &&
-      taskData.project &&
-      taskData.team &&
-      taskData.owners.length > 0 &&
-      taskData.status &&
-      taskData.tags &&
-      taskData.dueDate &&
-      taskData.timeToComplete
-    ) {
-      dispatch(createTask(taskData));
-    }
-  };
+  // const clearQueries = () => {
+  //   navigate(location.pathname, { replace: true });
+  // };
 
   return (
     <>
@@ -266,14 +149,15 @@ const Dashboard = () => {
             </select>
           </div>
           <button
-            onClick={() => setisNewProject(true)}
+            onClick={() => dispatch(setisProjectForm(true))}
             className="btn btn-primary mt-2 mt-md-0"
           >
             + New Project
           </button>
         </div>
       </div>
-      <div className="row gap-3 mx-3">
+
+      <div className="row gap-2 ">
         {projects.length > 0 && <ProjectList projects={projects} />}
       </div>
       <div className="my-4">
@@ -298,7 +182,8 @@ const Dashboard = () => {
           </div>
           <button
             onClick={() => {
-              setisNewTask(true);
+              dispatch(setisTaskForm(true));
+              // clearQueries();
             }}
             className="btn btn-primary mt-2 mt-md-0"
           >
@@ -306,256 +191,17 @@ const Dashboard = () => {
           </button>
         </div>
       </div>
-      <div className="row gap-3 mx-3">
+      <div className="row gap-2 ">
         {tasks.length > 0 && <TaskList tasks={tasks} />}
       </div>
 
       {/* create project */}
-      {isnewProject && (
-        <>
-          <div className="overlay">
-            <div className="project-form rounded">
-              <form onSubmit={handleProjectFormSubmit} className="">
-                <h5>Create New Project</h5>
-                <label htmlFor="name" className="form-label">
-                  Project Name
-                </label>
-                <input
-                  value={projectFormData.name}
-                  onChange={handleProjectForm}
-                  className="form-control mb-3"
-                  type="text"
-                  placeholder="Enter Project Name"
-                  id="name"
-                  required
-                />
 
-                <label htmlFor="status" className="form-label mt-2">
-                  Status
-                </label>
-                <select
-                  value={projectFormData.status}
-                  className="form-select"
-                  id="status"
-                  name="status"
-                  onChange={handleProjectForm}
-                  required
-                >
-                  <option value="Active">Active</option>
-                  <option value="Completed">Completed</option>
-                  <option value="On Hold">On Hold</option>
-                </select>
+      {isProjectForm && <NewProjectForm />}
 
-                <label htmlFor="description" className="form-label mt-2">
-                  Project Description
-                </label>
-                <textarea
-                  value={projectFormData.description}
-                  onChange={handleProjectForm}
-                  className="form-control"
-                  placeholder="Enter Project Description"
-                  rows="3"
-                  cols={30}
-                  id="description"
-                ></textarea>
-
-                {projectCreateError && (
-                  <p className="text-danger my-2">{projectCreateError}</p>
-                )}
-                {projectCreateMessage && (
-                  <p className="text-info my-2">{projectCreateMessage}</p>
-                )}
-
-                <div className="mt-4 d-flex justify-content-end gap-3">
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setisNewProject(false);
-                      dispatch(resetprojectCreateMessage());
-                      setPorjectFormData(initialProjectData);
-                    }}
-                    className="btn btn-secondary"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    disabled={projectCreateMessage === "loading"}
-                    className="btn btn-primary"
-                  >
-                    {projectCreateMessage === "loading"
-                      ? "Creating..."
-                      : "Create"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </>
-      )}
       {/* create Task */}
 
-      {isnewTask && (
-        <>
-          <div className="overlay">
-            <div className="project-form rounded">
-              <form onSubmit={handleTaskFormSubmit} className="">
-                <h5>Create New Task</h5>
-                <label htmlFor="project-select" className="form-label">
-                  Select Project
-                </label>
-                <select
-                  value={taskFormData.project._id}
-                  className="form-select mb-2"
-                  id="project-select"
-                  onChange={handleTaskForm}
-                  name="project"
-                  required
-                >
-                  {projects?.toReversed().map(({ _id, name }) => {
-                    return (
-                      <option key={_id} value={_id}>
-                        {name}
-                      </option>
-                    );
-                  })}
-                </select>
-
-                <label htmlFor="task-name" className="form-label">
-                  Task Name
-                </label>
-                <input
-                  value={taskFormData.name}
-                  placeholder="Enter Task Name"
-                  className="form-control mb-2"
-                  id="task-name"
-                  name="name"
-                  onChange={handleTaskForm}
-                  required
-                />
-
-                <label htmlFor="team-select" className="form-label">
-                  Select Team
-                </label>
-                <select
-                  value={taskFormData.team._id}
-                  className="form-select mb-2"
-                  id="team-select"
-                  name="team"
-                  onChange={handleTaskForm}
-                  required
-                >
-                  {teams?.toReversed().map(({ _id, name }) => {
-                    return (
-                      <option key={_id} value={_id}>
-                        {name}
-                      </option>
-                    );
-                  })}
-                </select>
-
-                <label htmlFor="owner-select" className="form-label">
-                  Owners
-                </label>
-                <Select
-                  isMulti
-                  options={teams
-                    ?.find(({ _id }) => _id == taskFormData.team)
-                    .members.map(({ _id, name }) => ({
-                      label: name,
-                      value: _id,
-                    }))}
-                  value={selectedOwner}
-                  onChange={setSelectedOwner}
-                  required
-                />
-
-                <label htmlFor="status-select" className="form-label mt-2">
-                  Status
-                </label>
-                <select
-                  value={taskFormData.status}
-                  className="form-select"
-                  id="status-select"
-                  name="status"
-                  onChange={handleTaskForm}
-                  required
-                >
-                  <option value="To Do">To Do</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Completed">Completed</option>
-                  <option value="Blocked">Blocked</option>
-                </select>
-
-                <label htmlFor="status-select" className="form-label mt-2">
-                  Tags
-                </label>
-                <CreatableSelect
-                  isMulti
-                  onChange={handleTag}
-                  value={taskFormData.tags}
-                  placeholder="Type and press Enter"
-                  required
-                />
-
-                <div className="d-flex justify-content-between mt-2">
-                  <div>
-                    <label className="form-label">Select Due date</label>
-                    <input
-                      value={taskFormData.dueDate}
-                      className="form-control mb-2"
-                      type="date"
-                      placeholder="Select date"
-                      name="dueDate"
-                      onChange={handleTaskForm}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="form-label">Estimated Days</label>
-                    <input
-                      value={taskFormData.timeToComplete}
-                      className="form-control mb-2"
-                      type="number"
-                      placeholder="Enter Time in Days"
-                      name="timeToComplete"
-                      onChange={handleTaskForm}
-                      required
-                    />
-                  </div>
-                </div>
-
-                {taskCreateError && (
-                  <p className="text-danger my-2">{taskCreateError}</p>
-                )}
-                {taskCreateMessage && (
-                  <p className="text-info my-2">{taskCreateMessage}</p>
-                )}
-
-                <div className="mt-4 d-flex justify-content-end gap-3">
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setisNewTask(false);
-                      handleTaskFormReset();
-                      dispatch(resetTaskCreateMessage());
-                    }}
-                    className="btn btn-secondary"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    disabled={taskCreateMessage === "loading"}
-                    className="btn btn-primary"
-                  >
-                    {taskCreateMessage === "loading" ? "Creating..." : "Create"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </>
-      )}
+      {isTaskForm && <NewTaskForm />}
     </>
   );
 };

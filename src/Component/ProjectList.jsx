@@ -11,7 +11,7 @@ const ProjectList = ({ projects }) => {
             : "badge bg-warning text-dark";
 
         return (
-          <div key={project._id} className="col-md-3 border bg-light p-4">
+          <div key={project._id} className="col-xl-3 border bg-light p-4">
             <p>
               <span className={`${statusBG} px-2 py-1 rounded`}>
                 {project.status}

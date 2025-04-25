@@ -32,22 +32,59 @@ const Team = () => {
       </div>
 
       <div className="row">
-        <div className="col-md-6">
+        <div className="col-xxl-3">
           <ul className="list-group">
             {teams.length > 0 &&
               teams.map((team) => {
                 return (
-                  <li
-                    key={team._id}
-                    className="list-group-item d-flex justify-content-between align-items-center"
-                  >
-                    {team.name}
-                    <Link
-                      to={`/team-details/${team._id}`}
-                      className="btn btn-primary btn-sm"
-                    >
-                      View
-                    </Link>
+                  <li key={team._id} className="list-group-item">
+                    <p>{team.name}</p>
+
+                    <div className="d-flex">
+                      {team?.members.slice(0, 3).map((owner, i) => {
+                        return (
+                          <div
+                            key={owner._id}
+                            className="rounded-circle border border-light text-bg-secondary d-flex justify-content-center align-items-center"
+                            style={{
+                              width: "40px",
+                              height: "40px",
+                              fontWeight: "bold",
+                              fontSize: "16px",
+                              position: "relative",
+                              left: `${-i * 12}px`,
+                            }}
+                          >
+                            {owner.name ? owner.name.charAt(0) : ""}
+                          </div>
+                        );
+                      })}
+
+                      {team?.members.length > 3 && (
+                        <div
+                          className="rounded-circle border border-light  text-bg-secondary d-flex justify-content-center align-items-center"
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            fontWeight: "bold",
+                            fontSize: "16px",
+                            position: "relative",
+                            left: `${-3 * 12}px`,
+                          }}
+                        >
+                          +{team?.members.length - 3}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="d-flex justify-content-end">
+                      <Link
+                        to={`/team-details/${team._id}`}
+                        className="btn btn-primary btn-sm mt-3"
+                      >
+                        View
+                      </Link>
+                    </div>
                   </li>
                 );
               })}

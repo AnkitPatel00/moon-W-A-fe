@@ -47,11 +47,33 @@ export const fetchProject = createAsyncThunk("project/fetch", async(query) => {
 })
 
 
+export const fetchProjectForForm = createAsyncThunk("projectForFrom/fetch", async() => {
+  try {
+      const response = await axios.get(`${apiUrl}`, { headers: headers() })
+      return response.data 
+    }
+   
+  catch (error)
+  {
+    if (error.response.data.error)
+    {
+      throw new Error(error.response.data.error)
+    }
+    throw new Error(error.message)
+  }
+})
+
+
 const initialState = {
-  projects:[],
+  projects: [],
+  projectsforForm: [],
+  isProjectForm:false,
   projectCreateState: "idle",
   projectCreateMessage: null,
   projectCreateError: null,
+  projectforFormState: "idle",
+  projectforFormMessage: null,
+  projectforFormError: null,
   projectFetchState: "idle",
   projectFetchMessage: null,
   projectFetchError: null,
@@ -63,6 +85,11 @@ const projectSlice = createSlice({
   initialState,
   reducers: {
     resetprojectCreateMessage: (state) => {
+      state.projectCreateMessage = null
+      state.projectCreateError = null
+    },
+    setisProjectForm: (state,action) => {
+      state.isProjectForm = action.payload
       state.projectCreateMessage = null
       state.projectCreateError = null
     }
@@ -92,7 +119,8 @@ const projectSlice = createSlice({
     builder.addCase(fetchProject.pending, (state) => {
     state.projectFetchState ="loading"
     })
-    builder.addCase(fetchProject.fulfilled, (state,action) => {
+    builder.addCase(fetchProject.fulfilled, (state, action) => {
+      console.log(action.payload)
       state.projectFetchState = "success"
       state.projects = action.payload
       state.projectFetchError =null
@@ -102,9 +130,25 @@ const projectSlice = createSlice({
       state.projectFetchError = action.error.message
     })
 
+
+    //fetch project for form
+
+    builder.addCase(fetchProjectForForm.pending, (state) => {
+    state.projectFetchState ="loading"
+    })
+    builder.addCase(fetchProjectForForm.fulfilled, (state,action) => {
+      state.projectFetchState = "success"
+      state.projectsforForm = action.payload
+      state.projectFetchError =null
+    })
+    builder.addCase(fetchProjectForForm.rejected, (state, action) => {
+      state.projectFetchState = "reject"
+      state.projectFetchError = action.error.message
+    })
+
   }
 })
 
 export default projectSlice.reducer
 
-export const {resetprojectCreateMessage} = projectSlice.actions
+export const {resetprojectCreateMessage,setisProjectForm} = projectSlice.actions

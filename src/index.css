@@ -11,22 +11,38 @@
   height: 100vh;
 }
 
-/* project form */
+/* overlay */
+.overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem; /* Add padding so form doesn't touch screen edges */
+  box-sizing: border-box;
+}
 
-.project-form{
-  width: 500px;
+/* project form */
+.project-form {
+  width: 100%; /* Full width within padding constraints */
+  max-width: 500px;
   border: 1px solid rgb(129, 122, 122);
   padding: 30px;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
   background-color: white;
+  box-sizing: border-box;
+
+  /* Remove translate and use flex centering */
+  position: relative;
 }
+
 
 /* overlay */
 
-.overlay{
+/* .overlay{
    background-color: rgba(0, 0, 0, 0.5);
       position: fixed;
       top: 0;
@@ -36,4 +52,18 @@
       display: flex;
       justify-content: center;
       align-items: center;
-}
+} */
+
+/* project form */
+
+/* .project-form{
+  max-width: 500px;
+  border: 1px solid rgb(129, 122, 122);
+  padding: 30px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  background-color: white;
+} */
+

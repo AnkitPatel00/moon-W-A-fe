@@ -23,7 +23,7 @@ const TaskList = ({ tasks }) => {
             : "";
 
         return (
-          <div key={task._id} className="col-md-3 border p-4">
+          <div key={task._id} className="col-md-4 border bg-body p-4">
             <p>
               <span className={`${statusBG} px-2 py-1 rounded`}>
                 {task.status}
@@ -31,40 +31,55 @@ const TaskList = ({ tasks }) => {
             </p>
             <h5 className="fs-4">{task.name}</h5>
             <div className="d-flex align-items-center">
-              {task.owners.map((owner, i) => {
-                const bgColor =
-                  i == 0
-                    ? "text-bg-primary"
-                    : i == 1
-                    ? "text-bg-secondary"
-                    : i == 2
-                    ? "text-bg-success"
-                    : i == 3
-                    ? "text-bg-danger"
-                    : i == 4
-                    ? "text-bg-warning"
-                    : i == 5
-                    ? "text-bg-info"
-                    : "text-bg-dark";
+              {task.owners.slice(0, 3).map((owner, i) => {
+                const avatarColors = [
+                  "#f94144",
+                  "#f3722c",
+                  "#f9844a",
+                  "#43aa8b",
+                  "#577590",
+                  "#277da1",
+                ];
+
+                const getRandomColor = () => {
+                  return avatarColors[
+                    Math.floor(Math.random() * avatarColors.length)
+                  ];
+                };
 
                 return (
                   <div
                     key={owner._id}
-                    className={`rounded-circle ${bgColor} d-flex justify-content-center align-items-center`}
+                    className="rounded-circle border border-light text-bg-secondary d-flex justify-content-center align-items-center"
                     style={{
                       width: "40px",
                       height: "40px",
                       fontWeight: "bold",
                       fontSize: "16px",
-                      zIndex: `${i}`,
                       position: "relative",
-                      left: `${-i}0px`,
+                      left: `${-i * 12}px`,
                     }}
                   >
                     {owner.name ? owner.name.charAt(0) : ""}
                   </div>
                 );
               })}
+
+              {task.owners.length > 3 && (
+                <div
+                  className="rounded-circle border border-light  text-bg-secondary d-flex justify-content-center align-items-center"
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    fontWeight: "bold",
+                    fontSize: "16px",
+                    position: "relative",
+                    left: `${-3 * 12}px`,
+                  }}
+                >
+                  +{task.owners.length - 3}
+                </div>
+              )}
             </div>
             <p>Due on: {task.dueDate}</p>
             <p></p>

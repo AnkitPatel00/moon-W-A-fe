@@ -4,21 +4,26 @@ import { useParams } from "react-router-dom";
 import {
   completedTaskUpdate,
   fetchTaskbyId,
+  fetchTaskDetailsbyId,
+  setisTaskForm,
 } from "../../features/task/taskSlice";
+import NewTaskForm from "../Component/NewTaskForm";
 
 const TaskDetails = () => {
   const { taskId } = useParams();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchTaskbyId(taskId));
+    dispatch(fetchTaskDetailsbyId(taskId));
   }, []);
 
-  const { tasksById } = useSelector((state) => state.taskState);
+  const { tasksDetailsById, isTaskForm } = useSelector(
+    (state) => state.taskState
+  );
 
   const daysRemain = () => {
     const today = new Date();
-    const dueDate = new Date(tasksById?.dueDate);
+    const dueDate = new Date(tasksDetailsById?.dueDate);
 
     const milisecond = dueDate - today;
 
@@ -49,36 +54,39 @@ const TaskDetails = () => {
     }
   };
 
+  console.log(tasksDetailsById);
+
   return (
     <>
       <div>
-        {tasksById && (
+        {tasksDetailsById && (
           <>
             <h2 className="">Task Details</h2>
-            <h5 className="">{tasksById.name}</h5>
-            <p>Status: {tasksById.status}</p>
+            <h5 className="">{tasksDetailsById.name}</h5>
+            <p>Status: {tasksDetailsById.status}</p>
             <p>
-              Project:<span className="ms-2">{tasksById.project.name}</span>
+              Project:
+              <span className="ms-2">{tasksDetailsById.project.name}</span>
             </p>
             <p>
               Team:
-              <span className="ms-2">{tasksById.team.name}</span>
+              <span className="ms-2">{tasksDetailsById.team.name}</span>
             </p>
             <p>
               Owners:{" "}
-              {tasksById.owners.map((owner) => {
+              {tasksDetailsById.owners.map((owner) => {
                 return <span key={owner._id}>{owner.name}</span>;
               })}
             </p>
             <p>
-              Due Date: <span>{tasksById.dueDate}</span>
+              Due Date: <span>{tasksDetailsById.dueDate}</span>
             </p>
 
             <p>
               Time Remaining:{" "}
               <span>
-                {tasksById.status === "Completed"
-                  ? `Completed at ${tasksById.completedAt}`
+                {tasksDetailsById.status === "Completed"
+                  ? `Completed at ${tasksDetailsById.completedAt}`
                   : daysRemain() +
                     ` Days ( ${
                       daysRemain() > 0
@@ -96,16 +104,25 @@ const TaskDetails = () => {
                 type="checkbox"
                 value=""
                 id="complete"
-                checked={tasksById.status === "Completed" ? true : false}
+                checked={tasksDetailsById.status === "Completed" ? true : false}
                 onChange={handleMarkComplete}
               />
               <label className="form-check-label" htmlFor="complete">
                 Mark as Complete
               </label>
             </div>
+
+            <button
+              onClick={() => dispatch(setisTaskForm(true))}
+              className="btn btn-primary mt-3"
+            >
+              Edit Task
+            </button>
           </>
         )}
       </div>
+
+      {isTaskForm && <NewTaskForm />}
     </>
   );
 };

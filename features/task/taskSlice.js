@@ -84,12 +84,12 @@ export const fetchTask = createAsyncThunk("task/fetch", async(query) => {
   }
 })
 
-//fetch task by Id
 
+//fetch task by project Id
 
-export const fetchTaskbyId = createAsyncThunk("taskbyId/fetch", async(taskId) => {
+export const fetchTaskbyId = createAsyncThunk("taskbyId/fetch", async (projectId) => {
   try {
-    const response = await axios.get(`${apiUrl}/${taskId}`,{headers:headers()})
+    const response = await axios.get(`${apiUrl}/${projectId}`, { headers: headers() })
     return response.data
   }
   catch (error)
@@ -102,9 +102,31 @@ export const fetchTaskbyId = createAsyncThunk("taskbyId/fetch", async(taskId) =>
   }
 })
 
+
+//fetch task details by taskId
+
+export const fetchTaskDetailsbyId = createAsyncThunk("taskDetailsbyId/fetch", async (taskId) => {
+  try {
+    const response = await axios.get(`${apiUrl}/taskDetails/${taskId}`, { headers: headers() })
+    return response.data
+  }
+  catch (error)
+  {
+    if (error.response.data.error)
+    {
+      throw new Error(error.response.data.error)
+    }
+    throw new Error(error.message)
+  }
+})
+
+
 const initialState = {
   tasks: [],
-  tasksById:null,
+  isTaskForm: false,
+  isUpdateTask:false,
+  tasksById:[],
+  tasksDetailsById:null,
   taskCreateState: "idle",
   taskCreateMessage: null,
   taskCreateError: null,
@@ -114,6 +136,9 @@ const initialState = {
   taskbyIdFetchState: "idle",
   taskbyIdFetchMessage: null,
   taskbyIdFetchError: null,
+  taskDetailsFetchState: "idle",
+  taskDetailsMessage: null,
+  taskDetailsError: null,
   taskCompUpdateState: "idle",
   taskCompUpdateError: null,
    taskDeleteState: "idle",
@@ -132,6 +157,11 @@ const taskSlice = createSlice({
     },
     clearTask: (state) => {
       state.tasks =[]
+    },
+    setisTaskForm: (state,action) => {
+      state.isTaskForm = action.payload
+       state.taskCreateMessage = null
+      state.taskCreateError = null
     }
   },
   extraReducers: (builder) => {
@@ -173,7 +203,7 @@ const taskSlice = createSlice({
      builder.addCase(fetchTaskbyId.pending, (state) => {
            state.taskFetchState ="loading"
            })
-           builder.addCase(fetchTaskbyId.fulfilled, (state,action) => {
+    builder.addCase(fetchTaskbyId.fulfilled, (state, action) => {
              state.taskbyIdFetchState = "success"
              state.tasksById = action.payload
              state.taskbyIdFetchError =null
@@ -182,6 +212,25 @@ const taskSlice = createSlice({
              state.taskbyIdFetchState = "reject"
              state.taskbyIdFetchError = action.error.message
            })
+    
+    
+    
+     // Tasks details byId
+        
+     builder.addCase(fetchTaskDetailsbyId.pending, (state) => {
+           state.taskDetailsFetchState ="loading"
+           })
+    builder.addCase(fetchTaskDetailsbyId.fulfilled, (state, action) => {
+             state.taskDetailsFetchState = "success"
+             state.tasksDetailsById = action.payload
+             state.taskDetailsError =null
+           })
+           builder.addCase(fetchTaskDetailsbyId.rejected, (state, action) => {
+             state.taskDetailsFetchState = "reject"
+             state.taskDetailsError = action.error.message
+           })
+    
+    
     
     //completed Task update
     
@@ -221,4 +270,4 @@ const taskSlice = createSlice({
 
 export default taskSlice.reducer
 
-export const {resetTaskCreateMessage,clearTask} = taskSlice.actions
+export const {resetTaskCreateMessage,clearTask,setisTaskForm} = taskSlice.actions

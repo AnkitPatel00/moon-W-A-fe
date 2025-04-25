@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useParams, useSearchParams } from "react-router-dom";
-import { clearTask, fetchTask } from "../../features/task/taskSlice";
+import {
+  clearTask,
+  fetchTask,
+  fetchTaskbyId,
+} from "../../features/task/taskSlice";
 import TaskList from "../Component/TaskList";
 import { fetchAllUser } from "../../features/user/userSlice";
 
@@ -10,7 +14,7 @@ const ProjectDetails = () => {
 
   const { projectId } = useParams();
 
-  // const [project, setProject] = useState(location.state);
+  const [owners, setOwners] = useState([]);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -64,10 +68,21 @@ const ProjectDetails = () => {
 
   useEffect(() => {
     dispatch(fetchAllUser());
+    dispatch(fetchTaskbyId(projectId));
   }, []);
 
-  const { tasks, taskFetchState } = useSelector((state) => state.taskState);
+  const { tasks, taskFetchState, tasksById } = useSelector(
+    (state) => state.taskState
+  );
   const { allUsers } = useSelector((state) => state.userState);
+
+  const taskOwners = [
+    ...new Set(
+      tasksById
+        ?.flatMap((task) => task.owners)
+        .map((owner) => `${owner.name + "split" + owner._id}`)
+    ),
+  ].map((owner) => owner.split("split")[0]);
 
   return (
     <>
@@ -101,8 +116,8 @@ const ProjectDetails = () => {
             onChange={(e) => setOwnerFilter(e.target.value)}
           >
             <option value={""}>All</option>
-            {allUsers?.map((user) => {
-              return <option value={user.name}>{user.name}</option>;
+            {taskOwners?.map((user) => {
+              return <option value={user}>{user}</option>;
             })}
           </select>
 
