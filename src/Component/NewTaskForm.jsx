@@ -44,13 +44,6 @@ const NewTaskForm = ({ taskId }) => {
     taskUpdateError,
   } = useSelector((state) => state.taskState);
 
-  useEffect(() => {
-    if (localStorage.getItem("accessToken")) {
-      dispatch(fetchTeams());
-      dispatch(fetchProjectForForm());
-    }
-  }, []);
-
   const [taskFormData, setTaskFormData] = useState(initialTaskData);
   const [selectedOwner, setSelectedOwner] = useState([]);
 
@@ -99,17 +92,11 @@ const NewTaskForm = ({ taskId }) => {
     }
   }, [taskDetailsFetchState, isUpdateTask, taskId]);
 
-  // console.log(tasksDetailsById);
-
-  // console.log(taskFormData);
-
-  // console.log(selectedOwner);
-
   useEffect(() => {
-    if (projectsforForm.length > 0 && !isUpdateTask) {
+    if (projects.length > 0 && !isUpdateTask) {
       setTaskFormData((prev) => ({
         ...prev,
-        project: projectsforForm[projectsforForm.length - 1]._id,
+        project: projects.length > 0 && projects[projects.length - 1]._id,
       }));
     }
 
@@ -119,7 +106,7 @@ const NewTaskForm = ({ taskId }) => {
         team: teams[teams.length - 1]._id,
       }));
     }
-  }, [projectsforForm, teams, isUpdateTask]);
+  }, [projects, teams, isUpdateTask]);
 
   const handleTaskForm = (e) => {
     const { name, value } = e.target;
@@ -134,7 +121,7 @@ const NewTaskForm = ({ taskId }) => {
   const handleTaskFormReset = () => {
     setTaskFormData({
       ...initialTaskData,
-      project: projectsforForm[projectsforForm.length - 1]._id,
+      project: projects.length > 0 && [projects.length - 1]._id,
       team: teams[teams.length - 1]._id,
     });
     setSelectedOwner([]);
@@ -150,6 +137,8 @@ const NewTaskForm = ({ taskId }) => {
   }, [taskCreateState, taskUpdateState]);
 
   const handleTaskFormSubmit = (e) => {
+    console.log("clicked");
+
     e.preventDefault();
 
     const taskData = {
@@ -169,7 +158,6 @@ const NewTaskForm = ({ taskId }) => {
       taskData.dueDate &&
       taskData.timeToComplete
     ) {
-      console.log(taskData);
       if (taskDetailsFetchState === "success" && isUpdateTask && taskId) {
         dispatch(updateTask({ taskId, updatedData: taskData }));
       } else {
@@ -180,7 +168,7 @@ const NewTaskForm = ({ taskId }) => {
 
   return (
     <>
-      {teams.length > 0 && (
+      {teams.length > 0 && projects.length > 0 && (
         <div className="overlay">
           <div className="project-form rounded">
             <form onSubmit={handleTaskFormSubmit} className="">
@@ -196,13 +184,14 @@ const NewTaskForm = ({ taskId }) => {
                 name="project"
                 required
               >
-                {projectsforForm?.toReversed().map(({ _id, name }) => {
-                  return (
-                    <option key={_id} value={_id}>
-                      {name}
-                    </option>
-                  );
-                })}
+                {projects.length > 0 &&
+                  projects?.toReversed().map(({ _id, name }) => {
+                    return (
+                      <option key={_id} value={_id}>
+                        {name}
+                      </option>
+                    );
+                  })}
               </select>
               <label htmlFor="task-name" className="form-label">
                 Task Name

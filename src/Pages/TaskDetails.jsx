@@ -15,8 +15,10 @@ const TaskDetails = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchTaskDetailsbyId(taskId));
-  }, []);
+    if (taskId) {
+      dispatch(fetchTaskDetailsbyId(taskId));
+    }
+  }, [taskId]);
 
   const { tasksDetailsById, isTaskForm, isUpdateTask, taskUpdateState } =
     useSelector((state) => state.taskState);

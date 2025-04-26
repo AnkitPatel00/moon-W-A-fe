@@ -1,7 +1,7 @@
 import { createSlice,createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-const apiUrl = "http://localhost:3000/api/projects"
+const apiUrl = "https://workasanabe.vercel.app/api/projects"
 
 const headers = () => {
   const obj = {
@@ -92,6 +92,9 @@ const projectSlice = createSlice({
       state.isProjectForm = action.payload
       state.projectCreateMessage = null
       state.projectCreateError = null
+    },
+    clearProjects: (state) => {
+      state.projects = []
     }
   },
   extraReducers: (builder) => {
@@ -120,7 +123,6 @@ const projectSlice = createSlice({
     state.projectFetchState ="loading"
     })
     builder.addCase(fetchProject.fulfilled, (state, action) => {
-      console.log(action.payload)
       state.projectFetchState = "success"
       state.projects = action.payload
       state.projectFetchError =null
@@ -151,4 +153,4 @@ const projectSlice = createSlice({
 
 export default projectSlice.reducer
 
-export const {resetprojectCreateMessage,setisProjectForm} = projectSlice.actions
+export const {resetprojectCreateMessage,setisProjectForm,clearProjects} = projectSlice.actions

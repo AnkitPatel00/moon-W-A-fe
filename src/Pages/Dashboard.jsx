@@ -8,15 +8,12 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { fetchTeams } from "../../features/team/teamSlice";
-import {
-  clearTask,
-  fetchTask,
-  setisTaskForm,
-} from "../../features/task/taskSlice";
+import { fetchTask, setisTaskForm } from "../../features/task/taskSlice";
 import TaskList from "../Component/TaskList";
 import ProjectList from "../Component/ProjectList";
 import NewProjectForm from "../Component/newProjectForm";
 import NewTaskForm from "../Component/NewTaskForm";
+import Loading from "../Component/Loading";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -35,28 +32,11 @@ const Dashboard = () => {
   const [taskFilter, setTaskFilter] = useState(statusTaskQuery || "");
 
   useEffect(() => {
-    setSearchParams(
-      (prevParams) => {
-        const params = new URLSearchParams(prevParams);
-        if (search) {
-          params.set("projectName", search);
-        } else {
-          params.delete("projectName");
-        }
-        if (projectFilter) {
-          params.set("projectStatus", projectFilter);
-        } else {
-          params.delete("projectStatus");
-        }
-        if (taskFilter) {
-          params.set("taskStatus", taskFilter);
-        } else {
-          params.delete("taskStatus");
-        }
-        return params;
-      },
-      { replace: true }
-    );
+    const params = new URLSearchParams();
+    if (search) params.set("projectName", search);
+    if (projectFilter) params.set("projectStatus", projectFilter);
+    if (taskFilter) params.set("taskStatus", taskFilter);
+    setSearchParams(params, { replace: true });
   }, [search, projectFilter, taskFilter]);
 
   const {
@@ -65,13 +45,13 @@ const Dashboard = () => {
     projectCreateState,
     projectCreateMessage,
     projectCreateError,
+    projectFetchState,
   } = useSelector((state) => state.projectState);
-
-  console.log(projects);
 
   const {
     tasks,
     isTaskForm,
+    taskFetchState,
     taskCreateState,
     taskCreateMessage,
     taskCreateError,
@@ -79,9 +59,17 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (localStorage.getItem("accessToken")) {
-      dispatch(fetchUser());
-      dispatch(fetchTeams());
+      const userTimer = setTimeout(() => dispatch(fetchUser()), 200);
+      const teamTimer = setTimeout(() => dispatch(fetchTeams()), 300);
+
+      return () => {
+        clearTimeout(userTimer);
+        clearTimeout(teamTimer);
+      };
     }
+  }, []);
+
+  useEffect(() => {
     if (projectCreateState === "success") {
       setPorjectFormData(initialProjectData);
     }
@@ -94,31 +82,34 @@ const Dashboard = () => {
     setSearch(e.target.value);
   };
 
-  let t;
+  // Project Fetch
   useEffect(() => {
-    if (search || projectFilter) {
-      t = setTimeout(() => {
-        dispatch(fetchProject(`?${searchParams.toString()}`));
-      }, 1000);
-    } else {
-      dispatch(fetchProject());
-    }
+    let projectTimeout;
 
-    if (taskFilter) {
-      t = setTimeout(() => {
-        dispatch(fetchTask(`?${searchParams.toString()}`));
-      }, 1000);
-    } else {
-      // dispatch(clearTask());
-      dispatch(fetchTask());
-    }
+    projectTimeout = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (search) params.set("projectName", search);
+      if (projectFilter) params.set("projectStatus", projectFilter);
 
-    return () => clearTimeout(t);
-  }, [searchParams]);
+      dispatch(fetchProject(params.toString() ? `?${params.toString()}` : ""));
+    }, 500);
 
-  // const clearQueries = () => {
-  //   navigate(location.pathname, { replace: true });
-  // };
+    return () => clearTimeout(projectTimeout);
+  }, [search, projectFilter]);
+
+  // Task Fetch
+  useEffect(() => {
+    let taskTimeout;
+
+    taskTimeout = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (taskFilter) params.set("taskStatus", taskFilter);
+
+      dispatch(fetchTask(params.toString() ? `?${params.toString()}` : ""));
+    }, 500);
+
+    return () => clearTimeout(taskTimeout);
+  }, [taskFilter]);
 
   return (
     <>
@@ -137,6 +128,7 @@ const Dashboard = () => {
               Status Filter:
             </label>
             <select
+              value={projectFilter}
               className="form-select"
               id="project-status-filter"
               style={{ width: "150px" }}
@@ -158,7 +150,10 @@ const Dashboard = () => {
       </div>
 
       <div className="row gap-2 ">
-        {projects.length > 0 && <ProjectList projects={projects} />}
+        {projectFetchState === "loading" && <Loading />}
+        {projects.length > 0 && projectFetchState !== "loading" && (
+          <ProjectList projects={projects} />
+        )}
       </div>
       <div className="my-4">
         <div className="d-flex justify-content-between align-items-center flex-wrap">
@@ -168,6 +163,7 @@ const Dashboard = () => {
               Status Filter:
             </label>
             <select
+              value={taskFilter}
               className="form-select"
               style={{ width: "150px" }}
               id="task-status-filter"
@@ -192,7 +188,10 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="row gap-2 ">
-        {tasks.length > 0 && <TaskList tasks={tasks} />}
+        {taskFetchState === "loading" && <Loading />}
+        {tasks.length > 0 && taskFetchState !== "loading" && (
+          <TaskList tasks={tasks} />
+        )}
       </div>
 
       {/* create project */}

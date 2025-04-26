@@ -2,11 +2,13 @@ import { useDispatch, useSelector } from "react-redux";
 import ProjectList from "../Component/ProjectList";
 import { useEffect, useState } from "react";
 import {
+  clearProjects,
   fetchProject,
   setisProjectForm,
 } from "../../features/project/projectSlice";
 import { useSearchParams } from "react-router-dom";
 import NewProjectForm from "../Component/newProjectForm";
+import Loading from "../Component/Loading";
 
 const Project = () => {
   const dispatch = useDispatch();
@@ -17,37 +19,33 @@ const Project = () => {
 
   const [projectFilter, setProjectFilter] = useState(statusProjectQuery || "");
 
-  useEffect(() => {
-    setSearchParams(
-      (prevParams) => {
-        const params = new URLSearchParams(prevParams);
-        if (projectFilter) {
-          params.set("projectStatus", projectFilter);
-        } else {
-          params.delete("projectStatus");
-        }
-        return params;
-      },
-      { replace: true }
-    );
-  }, [projectFilter]);
-
-  let t;
-  useEffect(() => {
-    if (projectFilter) {
-      t = setTimeout(() => {
-        dispatch(fetchProject(`?${searchParams.toString()}`));
-      }, 1000);
-    } else {
-      dispatch(fetchProject());
-    }
-
-    return () => clearTimeout(t);
-  }, [searchParams]);
-
-  const { projects, isProjectForm } = useSelector(
+  const { projects, isProjectForm, projectFetchState } = useSelector(
     (state) => state.projectState
   );
+
+  useEffect(() => {
+    dispatch(clearProjects());
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (projectFilter) params.set("projectStatus", projectFilter);
+    setSearchParams(params, { replace: true });
+  }, [projectFilter]);
+
+  // Project Fetch
+  useEffect(() => {
+    let projectTimeout;
+
+    projectTimeout = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (projectFilter) params.set("projectStatus", projectFilter);
+
+      dispatch(fetchProject(params.toString() ? `?${params.toString()}` : ""));
+    }, 500);
+
+    return () => clearTimeout(projectTimeout);
+  }, [projectFilter]);
 
   return (
     <>
@@ -80,7 +78,10 @@ const Project = () => {
       </div>
 
       <div className="row gap-3 mx-3 my-3">
-        {projects.length > 0 && <ProjectList projects={projects} />}
+        {projectFetchState === "loading" && <Loading />}
+        {projects.length > 0 && projectFetchState !== "loading" && (
+          <ProjectList projects={projects} />
+        )}
       </div>
 
       {isProjectForm && <NewProjectForm />}
