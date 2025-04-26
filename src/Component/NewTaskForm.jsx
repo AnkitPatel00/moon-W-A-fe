@@ -4,16 +4,22 @@ import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import { fetchTeams } from "../../features/team/teamSlice";
-import { createTask, setisTaskForm } from "../../features/task/taskSlice";
+import {
+  createTask,
+  fetchTaskDetailsbyId,
+  setisTaskForm,
+  setisUpdateTask,
+  updateTask,
+} from "../../features/task/taskSlice";
 import { fetchProjectForForm } from "../../features/project/projectSlice";
 
-const NewTaskForm = () => {
+const NewTaskForm = ({ taskId }) => {
   const dispatch = useDispatch();
 
   const initialTaskData = {
-    project: [],
+    project: "",
     name: "",
-    team: [],
+    team: "",
     status: "To Do",
     tags: [],
     dueDate: "",
@@ -26,9 +32,17 @@ const NewTaskForm = () => {
 
   const { teams } = useSelector((state) => state.teamState);
 
-  const { taskCreateState, taskCreateMessage, taskCreateError } = useSelector(
-    (state) => state.taskState
-  );
+  const {
+    isUpdateTask,
+    tasksDetailsById,
+    taskDetailsFetchState,
+    taskCreateState,
+    taskCreateMessage,
+    taskCreateError,
+    taskUpdateState,
+    taskUpdateMessage,
+    taskUpdateError,
+  } = useSelector((state) => state.taskState);
 
   useEffect(() => {
     if (localStorage.getItem("accessToken")) {
@@ -41,24 +55,71 @@ const NewTaskForm = () => {
   const [selectedOwner, setSelectedOwner] = useState([]);
 
   useEffect(() => {
-    setSelectedOwner([]);
-  }, [taskFormData.team]);
+    if (!isUpdateTask) {
+      setSelectedOwner([]);
+    }
+  }, [taskFormData.team, isUpdateTask]);
+
+  //get data to Update Form
 
   useEffect(() => {
-    if (projectsforForm.length > 0) {
+    if (isUpdateTask && taskId) {
+      dispatch(fetchTaskDetailsbyId(taskId));
+    }
+  }, [isUpdateTask, taskId]);
+
+  // set Data to Form if There is Data
+
+  useEffect(() => {
+    if (taskDetailsFetchState === "success" && isUpdateTask && taskId) {
+      setTaskFormData((prev) => {
+        return {
+          ...prev,
+          project: tasksDetailsById.project._id,
+          name: tasksDetailsById.name,
+          team: tasksDetailsById.team._id,
+          status: tasksDetailsById.status,
+          tags: tasksDetailsById.tags.map((tag) => ({
+            label: tag,
+            value: tag,
+          })),
+          dueDate: tasksDetailsById.dueDate,
+          timeToComplete: tasksDetailsById.timeToComplete,
+        };
+      });
+
+      setSelectedOwner((prev) => {
+        return [
+          ...tasksDetailsById.owners.map(({ _id, name }) => ({
+            label: name,
+            value: _id,
+          })),
+        ];
+      });
+    }
+  }, [taskDetailsFetchState, isUpdateTask, taskId]);
+
+  // console.log(tasksDetailsById);
+
+  // console.log(taskFormData);
+
+  // console.log(selectedOwner);
+
+  useEffect(() => {
+    if (projectsforForm.length > 0 && !isUpdateTask) {
       setTaskFormData((prev) => ({
         ...prev,
         project: projectsforForm[projectsforForm.length - 1]._id,
       }));
     }
 
-    if (teams.length > 0) {
+    if (teams.length > 0 && !isUpdateTask) {
       setTaskFormData((prev) => ({
         ...prev,
         team: teams[teams.length - 1]._id,
       }));
     }
-  }, [projectsforForm, teams]);
+  }, [projectsforForm, teams, isUpdateTask]);
 
   const handleTaskForm = (e) => {
     const { name, value } = e.target;
@@ -83,7 +144,10 @@ const NewTaskForm = () => {
     if (taskCreateState === "success") {
       handleTaskFormReset();
     }
-  }, [taskCreateState]);
+    if (taskUpdateState === "success") {
+      handleTaskFormReset();
+    }
+  }, [taskCreateState, taskUpdateState]);
 
   const handleTaskFormSubmit = (e) => {
     e.preventDefault();
@@ -105,7 +169,12 @@ const NewTaskForm = () => {
       taskData.dueDate &&
       taskData.timeToComplete
     ) {
-      dispatch(createTask(taskData));
+      console.log(taskData);
+      if (taskDetailsFetchState === "success" && isUpdateTask && taskId) {
+        dispatch(updateTask({ taskId, updatedData: taskData }));
+      } else {
+        dispatch(createTask(taskData));
+      }
     }
   };
 
@@ -115,12 +184,12 @@ const NewTaskForm = () => {
         <div className="overlay">
           <div className="project-form rounded">
             <form onSubmit={handleTaskFormSubmit} className="">
-              <h5>Create New Task</h5>
+              <h5>{isUpdateTask ? "Update Task" : "Create New Task"}</h5>
               <label htmlFor="project-select" className="form-label">
                 Select Project
               </label>
               <select
-                value={taskFormData.project._id}
+                value={taskFormData.project}
                 className="form-select mb-2"
                 id="project-select"
                 onChange={handleTaskForm}
@@ -135,7 +204,6 @@ const NewTaskForm = () => {
                   );
                 })}
               </select>
-
               <label htmlFor="task-name" className="form-label">
                 Task Name
               </label>
@@ -148,12 +216,11 @@ const NewTaskForm = () => {
                 onChange={handleTaskForm}
                 required
               />
-
               <label htmlFor="team-select" className="form-label">
                 Select Team
               </label>
               <select
-                value={taskFormData.team._id}
+                value={taskFormData.team}
                 className="form-select mb-2"
                 id="team-select"
                 name="team"
@@ -168,7 +235,6 @@ const NewTaskForm = () => {
                   );
                 })}
               </select>
-
               <label htmlFor="owner-select" className="form-label">
                 Owners
               </label>
@@ -184,7 +250,6 @@ const NewTaskForm = () => {
                 onChange={setSelectedOwner}
                 required
               />
-
               <label htmlFor="status-select" className="form-label mt-2">
                 Status
               </label>
@@ -201,7 +266,6 @@ const NewTaskForm = () => {
                 <option value="Completed">Completed</option>
                 <option value="Blocked">Blocked</option>
               </select>
-
               <label htmlFor="status-select" className="form-label mt-2">
                 Tags
               </label>
@@ -212,7 +276,6 @@ const NewTaskForm = () => {
                 placeholder="Type and press Enter"
                 required
               />
-
               <div className="d-flex justify-content-between mt-2">
                 <div>
                   <label className="form-label">Select Due date</label>
@@ -240,30 +303,50 @@ const NewTaskForm = () => {
                   />
                 </div>
               </div>
-
-              {taskCreateError && (
-                <p className="text-danger my-2">{taskCreateError}</p>
-              )}
-              {taskCreateMessage && (
-                <p className="text-info my-2">{taskCreateMessage}</p>
-              )}
-
+              <div>
+                {isUpdateTask ? (
+                  <>
+                    {taskUpdateError && (
+                      <p className="text-danger my-2">{taskUpdateError}</p>
+                    )}
+                    {taskUpdateMessage && (
+                      <p className="text-info my-2">{taskUpdateMessage}</p>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {taskCreateError && (
+                      <p className="text-danger my-2">{taskCreateError}</p>
+                    )}
+                    {taskCreateMessage && (
+                      <p className="text-info my-2">{taskCreateMessage}</p>
+                    )}
+                  </>
+                )}
+              </div>
               <div className="mt-4 d-flex justify-content-end gap-3">
                 <button
                   onClick={(e) => {
                     e.preventDefault();
                     handleTaskFormReset();
                     dispatch(setisTaskForm(false));
+                    dispatch(setisUpdateTask(false));
                   }}
                   className="btn btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
-                  disabled={taskCreateMessage === "loading"}
+                  disabled={taskCreateState === "loading"}
                   className="btn btn-primary"
                 >
-                  {taskCreateMessage === "loading" ? "Creating..." : "Create"}
+                  {isUpdateTask
+                    ? `${
+                        taskUpdateState === "loading" ? "Updating..." : "Update"
+                      }`
+                    : `${
+                        taskCreateState === "loading" ? "Creating..." : "Create"
+                      }`}
                 </button>
               </div>
             </form>

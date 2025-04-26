@@ -6,6 +6,7 @@ import {
   fetchTaskbyId,
   fetchTaskDetailsbyId,
   setisTaskForm,
+  setisUpdateTask,
 } from "../../features/task/taskSlice";
 import NewTaskForm from "../Component/NewTaskForm";
 
@@ -17,9 +18,14 @@ const TaskDetails = () => {
     dispatch(fetchTaskDetailsbyId(taskId));
   }, []);
 
-  const { tasksDetailsById, isTaskForm } = useSelector(
-    (state) => state.taskState
-  );
+  const { tasksDetailsById, isTaskForm, isUpdateTask, taskUpdateState } =
+    useSelector((state) => state.taskState);
+
+  useEffect(() => {
+    if (taskUpdateState === "success") {
+      dispatch(fetchTaskDetailsbyId(taskId));
+    }
+  }, [taskUpdateState]);
 
   const daysRemain = () => {
     const today = new Date();
@@ -53,8 +59,6 @@ const TaskDetails = () => {
       );
     }
   };
-
-  console.log(tasksDetailsById);
 
   return (
     <>
@@ -113,7 +117,10 @@ const TaskDetails = () => {
             </div>
 
             <button
-              onClick={() => dispatch(setisTaskForm(true))}
+              onClick={() => {
+                dispatch(setisTaskForm(true));
+                dispatch(setisUpdateTask(true));
+              }}
               className="btn btn-primary mt-3"
             >
               Edit Task
@@ -122,7 +129,7 @@ const TaskDetails = () => {
         )}
       </div>
 
-      {isTaskForm && <NewTaskForm />}
+      {isTaskForm && isUpdateTask && <NewTaskForm taskId={taskId} />}
     </>
   );
 };

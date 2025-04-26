@@ -29,6 +29,24 @@ export const createTask = createAsyncThunk("task/create", async(taskData) => {
 })
 
 
+//update Task
+
+export const updateTask = createAsyncThunk("task/update", async(taskData) => {
+  try {
+    const response = await axios.post(`${apiUrl}/${taskData.taskId}`,taskData.updatedData,{headers:headers()})
+    return response.data
+  }
+  catch (error)
+  {
+    if (error.response.data.error)
+    {
+      throw new Error(error.response.data.error)
+    }
+    throw new Error(error.message)
+  }
+})
+
+
 //task delete
 
 export const deleteTask = createAsyncThunk("task/delete", async(taskId) => {
@@ -130,6 +148,9 @@ const initialState = {
   taskCreateState: "idle",
   taskCreateMessage: null,
   taskCreateError: null,
+  taskUpdateState: "idle",
+  taskUpdateMessage: null,
+  taskUpdateError: null,
   taskFetchState: "idle",
   taskFetchMessage: null,
   taskFetchError: null,
@@ -162,6 +183,11 @@ const taskSlice = createSlice({
       state.isTaskForm = action.payload
        state.taskCreateMessage = null
       state.taskCreateError = null
+    },
+    setisUpdateTask: (state,action) => {
+      state.isUpdateTask = action.payload
+ state.taskUpdateMessage = null
+      state.taskUpdateError = null
     }
   },
   extraReducers: (builder) => {
@@ -181,6 +207,22 @@ const taskSlice = createSlice({
       state.taskCreateState = "reject"
       state.taskCreateError = action.error.message
       state.taskCreateMessage = null
+    })
+
+    //task update
+
+    builder.addCase(updateTask.pending, (state) => {
+    state.taskUpdateState ="loading"
+    })
+    builder.addCase(updateTask.fulfilled, (state,action) => {
+      state.taskUpdateState = "success"
+      state.taskUpdateMessage = action.payload.message
+      state.taskUpdateError =null
+    })
+    builder.addCase(updateTask.rejected, (state, action) => {
+      state.taskUpdateState = "reject"
+      state.taskUpdateError = action.error.message
+      state.taskUpdateMessage = null
     })
 
     // fetch task
@@ -270,4 +312,4 @@ const taskSlice = createSlice({
 
 export default taskSlice.reducer
 
-export const {resetTaskCreateMessage,clearTask,setisTaskForm} = taskSlice.actions
+export const {resetTaskCreateMessage,clearTask,setisTaskForm,setisUpdateTask} = taskSlice.actions
