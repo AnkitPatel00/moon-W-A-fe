@@ -6,14 +6,14 @@ import {
   setisMemberForm,
 } from "../../features/team/teamSlice";
 import AddMember from "../Component/AddMember";
+import Loading from "../Component/Loading";
 
 const TeamDetails = () => {
   const { teamId } = useParams();
 
   const dispatch = useDispatch();
-  const { teamWithId, isMemberForm, teamAddMemberState } = useSelector(
-    (state) => state.teamState
-  );
+  const { teamWithId, isMemberForm, teamsWithIdState, teamAddMemberState } =
+    useSelector((state) => state.teamState);
 
   useEffect(() => {
     if (teamAddMemberState === "success") {
@@ -27,6 +27,8 @@ const TeamDetails = () => {
 
   return (
     <>
+      <div>{teamsWithIdState === "loading" && <Loading />}</div>
+
       {teamWithId && (
         <>
           <h2>{teamWithId.name}</h2>

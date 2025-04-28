@@ -9,6 +9,7 @@ import {
   setisUpdateTask,
 } from "../../features/task/taskSlice";
 import NewTaskForm from "../Component/NewTaskForm";
+import Loading from "../Component/Loading";
 
 const TaskDetails = () => {
   const { taskId } = useParams();
@@ -20,8 +21,13 @@ const TaskDetails = () => {
     }
   }, [taskId]);
 
-  const { tasksDetailsById, isTaskForm, isUpdateTask, taskUpdateState } =
-    useSelector((state) => state.taskState);
+  const {
+    tasksDetailsById,
+    isTaskForm,
+    isUpdateTask,
+    taskUpdateState,
+    taskDetailsFetchState,
+  } = useSelector((state) => state.taskState);
 
   useEffect(() => {
     if (taskUpdateState === "success") {
@@ -62,10 +68,16 @@ const TaskDetails = () => {
     }
   };
 
+  console.log(isUpdateTask);
+
+  // console.log({ isTaskForm, isUpdateTask, tasksDetailsById, taskUpdateState });
+
   return (
     <>
       <div>
-        {tasksDetailsById && (
+        <div>{taskDetailsFetchState === "loading" && <Loading />}</div>
+
+        {tasksDetailsById && taskDetailsFetchState !== "loading" && (
           <>
             <h2 className="">Task Details</h2>
             <h5 className="">{tasksDetailsById.name}</h5>
@@ -120,7 +132,7 @@ const TaskDetails = () => {
 
             <button
               onClick={() => {
-                dispatch(setisTaskForm(true));
+                console.log("Clicked");
                 dispatch(setisUpdateTask(true));
               }}
               className="btn btn-primary mt-3"
@@ -131,7 +143,16 @@ const TaskDetails = () => {
         )}
       </div>
 
-      {isTaskForm && isUpdateTask && <NewTaskForm taskId={taskId} />}
+      {/* {isUpdateTask && (
+        <>
+          <p>Working</p>
+          <button onClick={() => dispatch(setisUpdateTask(false))}>
+            Cancel
+          </button>
+        </>
+      )} */}
+
+      {isUpdateTask && <NewTaskForm taskId={taskId} />}
     </>
   );
 };

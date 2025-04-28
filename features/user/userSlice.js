@@ -27,8 +27,6 @@ export const loginUser = createAsyncThunk("user/login", async(userData) => {
   try {
     const response = await axios.post(`${apiUrl}/login`,userData,{headers:{'Content-Type':'application/json'}})
     
-    console.log(response.data)
-    
     return response.data
   }
   catch (error)

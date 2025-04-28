@@ -1,7 +1,7 @@
 import { createSlice,createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-const apiUrl = "https://workasanabe.vercel.app/api/report"
+const apiUrl = "http://localhost:3000/api/report"
 
 const headers = () => {
   const obj = {
@@ -76,6 +76,9 @@ const initialState = {
   TaskDaysLeftState: "idle",
   DaysLeftMessage: null,
   DaysLeftError: null,
+  completeTaskByTeamState: "idle",
+  completeTaskByTeamMessage: null,
+  completeTaskByTeamError: null,
 };
 
 
@@ -124,16 +127,16 @@ const reportSlice = createSlice({
     // fetch completed task by team
 
      builder.addCase(fetchCompletedTaskByTeam.pending, (state) => {
-        state.TaskDaysLeftState ="loading"
+        state.completeTaskByTeamState ="loading"
         })
         builder.addCase(fetchCompletedTaskByTeam.fulfilled, (state,action) => {
-          state.TaskDaysLeftState = "success"
+          state.completeTaskByTeamState = "success"
           state.taskCompletedByTeams = action.payload.team
-          state.DaysLeftError = null
+          state.completeTaskByTeamError = null
         })
         builder.addCase(fetchCompletedTaskByTeam.rejected, (state, action) => {
-          state.TaskDaysLeftState = "reject"
-          state.DaysLeftError = action.error.message
+          state.completeTaskByTeamState = "reject"
+          state.completeTaskByTeamError = action.error.message
         })
     
     

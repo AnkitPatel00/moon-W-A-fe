@@ -61,6 +61,8 @@ const NewTaskForm = ({ taskId }) => {
     }
   }, [isUpdateTask, taskId]);
 
+  console.log(tasksDetailsById, isUpdateTask);
+
   // set Data to Form if There is Data
 
   useEffect(() => {

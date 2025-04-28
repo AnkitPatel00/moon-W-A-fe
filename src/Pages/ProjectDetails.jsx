@@ -65,7 +65,6 @@ const ProjectDetails = () => {
   const { tasks, taskFetchState, tasksById } = useSelector(
     (state) => state.taskState
   );
-  // const { allUsers } = useSelector((state) => state.userState);
 
   const taskOwners = [
     ...new Set(
@@ -108,7 +107,11 @@ const ProjectDetails = () => {
           >
             <option value={""}>All</option>
             {taskOwners?.map((user) => {
-              return <option value={user}>{user}</option>;
+              return (
+                <option key={user} value={user}>
+                  {user}
+                </option>
+              );
             })}
           </select>
 

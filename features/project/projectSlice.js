@@ -1,7 +1,7 @@
 import { createSlice,createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-const apiUrl = "https://workasanabe.vercel.app/api/projects"
+const apiUrl = "http://localhost:3000/api/projects"
 
 const headers = () => {
   const obj = {

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchTeams, setisForm } from "../../features/team/teamSlice";
 import { Link } from "react-router-dom";
 import CreateTeamForm from "../Component/CreateTeamForm";
+import Loading from "../Component/Loading";
 
 const Team = () => {
   const dispatch = useDispatch();
@@ -11,7 +12,9 @@ const Team = () => {
     dispatch(fetchTeams());
   }, []);
 
-  const { teams, isForm } = useSelector((state) => state.teamState);
+  const { teams, teamsFetchState, isForm } = useSelector(
+    (state) => state.teamState
+  );
 
   return (
     <>
@@ -34,7 +37,9 @@ const Team = () => {
       <div className="row">
         <div className="col-xxl-3">
           <ul className="list-group">
+            <div>{teamsFetchState === "loading" && <Loading />}</div>
             {teams.length > 0 &&
+              teamsFetchState !== "loading" &&
               teams.map((team) => {
                 return (
                   <li key={team._id} className="list-group-item">

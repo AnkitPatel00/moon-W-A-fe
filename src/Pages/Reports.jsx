@@ -7,18 +7,31 @@ import {
   fetchCompletedTaskByTeam,
   fetchtotalDaysLeft,
 } from "../../features/report/reportSlice";
+import Loading from "../Component/Loading";
 
 const Reports = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchClosedTaskLastweek());
-    dispatch(fetchtotalDaysLeft());
-    dispatch(fetchCompletedTaskByTeam());
+    setTimeout(() => {
+      dispatch(fetchClosedTaskLastweek());
+    }, 100);
+    setTimeout(() => {
+      dispatch(fetchtotalDaysLeft());
+    }, 200);
+    setTimeout(() => {
+      dispatch(fetchCompletedTaskByTeam());
+    }, 300);
   }, []);
 
-  const { lastWeekCompletedTask, taskDaysLeft, taskCompletedByTeams } =
-    useSelector((state) => state.reportState);
+  const {
+    lastWeekCompletedTask,
+    taskDaysLeft,
+    TaskDaysLeftState,
+    closedLWeekTaskState,
+    taskCompletedByTeams,
+    completeTaskByTeamState,
+  } = useSelector((state) => state.reportState);
 
   const barData1 = {
     labels: [
@@ -79,21 +92,33 @@ const Reports = () => {
     ],
   };
 
+  console.log({ lastWeekCompletedTask, taskDaysLeft, taskCompletedByTeams });
+
   return (
     <>
       <h2>Report Overview</h2>
       <div className="container-fluid  py-4">
         <div className="row gap-3 ">
           <div className="col-12 col-lg-3 p-4 rounded bg-light">
-            <Pie data={barData1} />
+            <div>
+              {TaskDaysLeftState === "loading" &&
+                closedLWeekTaskState === "loading" && <Loading />}
+            </div>
+            {lastWeekCompletedTask && taskDaysLeft !== "loading" && (
+              <Pie data={barData1} />
+            )}
           </div>
 
           <div className="col-12 col-lg-7  rounded p-4 bg-light">
-            <Bar data={barData2} />
+            <div>{completeTaskByTeamState === "loading" && <Loading />}</div>
+            {completeTaskByTeamState !== "loading" &&
+              taskCompletedByTeams.length > 0 && <Bar data={barData2} />}
           </div>
 
           <div className="col-12 col-lg-10 p-4  rounded bg-light">
-            <Bar data={barData3} />
+            <div>{completeTaskByTeamState === "loading" && <Loading />}</div>
+            {completeTaskByTeamState !== "loading" &&
+              taskCompletedByTeams.length > 0 && <Bar data={barData3} />}
           </div>
         </div>
       </div>
