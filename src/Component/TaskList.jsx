@@ -1,14 +1,23 @@
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { deleteTask } from "../../features/task/taskSlice";
+import { useEffect, useState } from "react";
 const TaskList = ({ tasks }) => {
   const dispatch = useDispatch();
+
+  const [deleteBtn, setDeleteBtn] = useState(null);
 
   const handleTaskDelete = (taskId) => {
     dispatch(deleteTask(taskId));
   };
 
   const { taskDeleteState } = useSelector((state) => state.taskState);
+
+  useEffect(() => {
+    if (taskDeleteState === "success") {
+      setDeleteBtn(null);
+    }
+  }, [taskDeleteState]);
 
   return (
     <>
@@ -81,11 +90,20 @@ const TaskList = ({ tasks }) => {
             </Link>
 
             <button
-              disabled={taskDeleteState === "loading" ? true : false}
+              disabled={
+                taskDeleteState === "loading" && deleteBtn == task._id
+                  ? true
+                  : false
+              }
               className="btn btn-danger btn-sm ms-3"
-              onClick={() => handleTaskDelete(task._id)}
+              onClick={() => {
+                setDeleteBtn(task._id);
+                handleTaskDelete(task._id);
+              }}
             >
-              {taskDeleteState === "loading" ? "Deleting..." : "Delete"}
+              {taskDeleteState === "loading" && deleteBtn == task._id
+                ? "Deleting..."
+                : "Delete"}
             </button>
           </div>
         );

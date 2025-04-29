@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
@@ -30,10 +30,16 @@ const TaskDetails = () => {
   } = useSelector((state) => state.taskState);
 
   useEffect(() => {
-    if (taskUpdateState === "success" || taskCompUpdateState === "success") {
+    if (taskUpdateState === "success") {
       dispatch(fetchTaskDetailsbyId(taskId));
     }
-  }, [taskUpdateState, taskCompUpdateState]);
+  }, [taskUpdateState]);
+
+  useEffect(() => {
+    if (taskCompUpdateState === "success") {
+      dispatch(fetchTaskDetailsbyId(taskId));
+    }
+  }, [taskCompUpdateState]);
 
   const daysRemain = () => {
     const today = new Date();
@@ -67,13 +73,6 @@ const TaskDetails = () => {
       );
     }
   };
-
-  // console.log(new Date(tasksDetailsById.completedAt).toISOString());
-
-  // console.log(
-  //   tasksDetailsById.completedAt &&
-  //     new Date(tasksDetailsById?.completedAt).toISOString()
-  // );
 
   const completedAt = tasksDetailsById?.completedAt;
   const dateObject = new Date(completedAt);

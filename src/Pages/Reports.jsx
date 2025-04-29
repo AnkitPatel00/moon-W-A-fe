@@ -92,8 +92,6 @@ const Reports = () => {
     ],
   };
 
-  console.log({ lastWeekCompletedTask, taskDaysLeft, taskCompletedByTeams });
-
   return (
     <>
       <h2>Report Overview</h2>
