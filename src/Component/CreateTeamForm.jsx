@@ -97,7 +97,12 @@ const CreateTeamForm = () => {
               <button className="btn btn-secondary" onClick={handleFormCancel}>
                 Cancel
               </button>
-              <button className="btn btn-primary">Create</button>
+              <button
+                disabled={teamsCreateState === "loading"}
+                className="btn btn-primary"
+              >
+                {teamsCreateState === "loading" ? "Creating..." : "Create"}
+              </button>
             </div>
           </form>
         </div>

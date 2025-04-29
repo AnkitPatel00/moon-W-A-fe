@@ -8,13 +8,19 @@ import Loading from "../Component/Loading";
 const Team = () => {
   const dispatch = useDispatch();
 
+  const { teams, teamsFetchState, teamsCreateState, isForm } = useSelector(
+    (state) => state.teamState
+  );
+
   useEffect(() => {
     dispatch(fetchTeams());
   }, []);
 
-  const { teams, teamsFetchState, isForm } = useSelector(
-    (state) => state.teamState
-  );
+  useEffect(() => {
+    if (teamsCreateState === "success") {
+      dispatch(fetchTeams());
+    }
+  }, [teamsCreateState]);
 
   return (
     <>

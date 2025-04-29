@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchUser } from "../../features/user/userSlice";
+import { fetchUser, logoutUser } from "../../features/user/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchProject,
@@ -18,6 +18,34 @@ import Loading from "../Component/Loading";
 const Dashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const storedExpireTime = localStorage.getItem("expireTime");
+
+    if (storedExpireTime) {
+      const expTime = JSON.parse(storedExpireTime);
+
+      if (expTime && expTime.exp) {
+        const futureTime = expTime.exp * 1000;
+        const now = Date.now();
+        const timeLeft = futureTime - now;
+
+        if (timeLeft > 0) {
+          console.log("timer started");
+          const logOutTimer = setTimeout(() => {
+            dispatch(logoutUser());
+            window.location.reload();
+          }, timeLeft);
+
+          return () => clearTimeout(logOutTimer);
+        } else {
+          dispatch(logoutUser());
+        }
+      } else {
+        dispatch(logoutUser());
+      }
+    }
+  }, [localStorage.getItem("expireTime")]);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -39,23 +67,12 @@ const Dashboard = () => {
     setSearchParams(params, { replace: true });
   }, [search, projectFilter, taskFilter]);
 
-  const {
-    projects,
-    isProjectForm,
-    projectCreateState,
-    projectCreateMessage,
-    projectCreateError,
-    projectFetchState,
-  } = useSelector((state) => state.projectState);
+  const { projects, isProjectForm, projectCreateState, projectFetchState } =
+    useSelector((state) => state.projectState);
 
-  const {
-    tasks,
-    isTaskForm,
-    taskFetchState,
-    taskCreateState,
-    taskCreateMessage,
-    taskCreateError,
-  } = useSelector((state) => state.taskState);
+  const { tasks, isTaskForm, taskFetchState, taskCreateState } = useSelector(
+    (state) => state.taskState
+  );
 
   useEffect(() => {
     if (localStorage.getItem("accessToken")) {
@@ -69,14 +86,19 @@ const Dashboard = () => {
     }
   }, []);
 
+  const clearQueries = () => {
+    setProjectFilter("");
+    navigate(location.pathname, { replace: true });
+  };
+
   useEffect(() => {
-    if (projectCreateState === "success") {
-      setPorjectFormData(initialProjectData);
-    }
     if (taskCreateState === "success") {
       dispatch(fetchTask());
     }
-  }, [projectCreateState, taskCreateState]);
+    if (projectCreateState === "success") {
+      clearQueries();
+    }
+  }, [taskCreateState, projectCreateState]);
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
@@ -128,6 +150,7 @@ const Dashboard = () => {
               Status Filter:
             </label>
             <select
+              disabled={projectFetchState === "loading" ? true : false}
               value={projectFilter}
               className="form-select"
               id="project-status-filter"
@@ -141,7 +164,9 @@ const Dashboard = () => {
             </select>
           </div>
           <button
-            onClick={() => dispatch(setisProjectForm(true))}
+            onClick={() => {
+              dispatch(setisProjectForm(true));
+            }}
             className="btn btn-primary mt-2 mt-md-0"
           >
             + New Project
@@ -151,6 +176,9 @@ const Dashboard = () => {
 
       <div className="row gap-2 ">
         {projectFetchState === "loading" && <Loading />}
+        {projects.length < 1 && projectFetchState !== "loading" && (
+          <p>No Project Found!</p>
+        )}
         {projects.length > 0 && projectFetchState !== "loading" && (
           <ProjectList projects={projects} />
         )}
@@ -179,7 +207,7 @@ const Dashboard = () => {
           <button
             onClick={() => {
               dispatch(setisTaskForm(true));
-              // clearQueries();
+              clearQueries();
             }}
             className="btn btn-primary mt-2 mt-md-0"
           >
@@ -189,6 +217,9 @@ const Dashboard = () => {
       </div>
       <div className="row gap-2 ">
         {taskFetchState === "loading" && <Loading />}
+        {tasks.length < 1 && taskFetchState !== "loading" && (
+          <p>No Task Found!</p>
+        )}
         {tasks.length > 0 && taskFetchState !== "loading" && (
           <TaskList tasks={tasks} />
         )}

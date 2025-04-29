@@ -6,15 +6,33 @@ import CreatableSelect from "react-select/creatable";
 import { fetchTeams } from "../../features/team/teamSlice";
 import {
   createTask,
-  fetchTaskDetailsbyId,
   setisTaskForm,
   setisUpdateTask,
   updateTask,
 } from "../../features/task/taskSlice";
-import { fetchProjectForForm } from "../../features/project/projectSlice";
+import { fetchProject } from "../../features/project/projectSlice";
 
 const NewTaskForm = ({ taskId }) => {
   const dispatch = useDispatch();
+
+  const [manualTeamChange, setManualTeamChange] = useState(false);
+
+  const { projects } = useSelector((state) => state.projectState);
+
+  const { teams } = useSelector((state) => state.teamState);
+
+  const {
+    isUpdateTask,
+    isTaskForm,
+    tasksDetailsById,
+    taskDetailsFetchState,
+    taskCreateState,
+    taskCreateMessage,
+    taskCreateError,
+    taskUpdateState,
+    taskUpdateMessage,
+    taskUpdateError,
+  } = useSelector((state) => state.taskState);
 
   const initialTaskData = {
     project: "",
@@ -26,79 +44,69 @@ const NewTaskForm = ({ taskId }) => {
     timeToComplete: "",
   };
 
-  const { projects, projectsforForm } = useSelector(
-    (state) => state.projectState
-  );
-
-  const { teams } = useSelector((state) => state.teamState);
-
-  const {
-    isUpdateTask,
-    tasksDetailsById,
-    taskDetailsFetchState,
-    taskCreateState,
-    taskCreateMessage,
-    taskCreateError,
-    taskUpdateState,
-    taskUpdateMessage,
-    taskUpdateError,
-  } = useSelector((state) => state.taskState);
-
   const [taskFormData, setTaskFormData] = useState(initialTaskData);
   const [selectedOwner, setSelectedOwner] = useState([]);
 
+  // console.log(isUpdateTask, taskDetailsFetchState, taskFormData);
+
   useEffect(() => {
-    if (!isUpdateTask) {
+    if (manualTeamChange) {
       setSelectedOwner([]);
     }
-  }, [taskFormData.team, isUpdateTask]);
+  }, [manualTeamChange]);
 
-  //get data to Update Form
+  //maybe this is problem 1
 
   useEffect(() => {
-    if (isUpdateTask && taskId) {
-      dispatch(fetchTaskDetailsbyId(taskId));
+    if (projects.length < 1) {
+      dispatch(fetchProject());
     }
-  }, [isUpdateTask, taskId]);
-
-  console.log(tasksDetailsById, isUpdateTask);
+    if (teams.length < 1) {
+      dispatch(fetchTeams());
+    }
+  }, []);
 
   // set Data to Form if There is Data
 
   useEffect(() => {
-    if (taskDetailsFetchState === "success" && isUpdateTask && taskId) {
+    if (isUpdateTask && taskId) {
       setTaskFormData((prev) => {
         return {
           ...prev,
-          project: tasksDetailsById.project._id,
-          name: tasksDetailsById.name,
-          team: tasksDetailsById.team._id,
-          status: tasksDetailsById.status,
-          tags: tasksDetailsById.tags.map((tag) => ({
-            label: tag,
-            value: tag,
-          })),
-          dueDate: tasksDetailsById.dueDate,
-          timeToComplete: tasksDetailsById.timeToComplete,
+          ...{
+            project: tasksDetailsById.project._id,
+            name: tasksDetailsById.name,
+            team: tasksDetailsById.team._id,
+            status: tasksDetailsById.status,
+            tags: tasksDetailsById.tags.map((tag) => ({
+              label: tag,
+              value: tag,
+            })),
+            dueDate: tasksDetailsById.dueDate,
+            timeToComplete: tasksDetailsById.timeToComplete,
+          },
         };
       });
 
-      setSelectedOwner((prev) => {
-        return [
-          ...tasksDetailsById.owners.map(({ _id, name }) => ({
-            label: name,
-            value: _id,
-          })),
-        ];
-      });
+      setSelectedOwner(
+        tasksDetailsById.owners.map(({ _id, name }) => ({
+          label: name,
+          value: _id,
+        }))
+      );
+      setManualTeamChange(false);
     }
-  }, [taskDetailsFetchState, isUpdateTask, taskId]);
+  }, [isUpdateTask, taskId]);
+
+  // console.log(tasksDetailsById);
+
+  //new task code start
 
   useEffect(() => {
     if (projects.length > 0 && !isUpdateTask) {
       setTaskFormData((prev) => ({
         ...prev,
-        project: projects.length > 0 && projects[projects.length - 1]._id,
+        project: projects[projects.length - 1]._id,
       }));
     }
 
@@ -123,24 +131,22 @@ const NewTaskForm = ({ taskId }) => {
   const handleTaskFormReset = () => {
     setTaskFormData({
       ...initialTaskData,
-      project: projects.length > 0 && [projects.length - 1]._id,
-      team: teams[teams.length - 1]._id,
+      project: projects.length > 0 && projects[projects.length - 1]._id,
+      team: teams.length > 0 && teams[teams.length - 1]._id,
     });
     setSelectedOwner([]);
+    setManualTeamChange(false);
   };
 
   useEffect(() => {
-    if (taskCreateState === "success") {
+    if (taskCreateState === "success" && !isUpdateTask) {
       handleTaskFormReset();
     }
-    if (taskUpdateState === "success") {
-      handleTaskFormReset();
-    }
-  }, [taskCreateState, taskUpdateState]);
+  }, [taskCreateState, isUpdateTask]);
+
+  //new task code end
 
   const handleTaskFormSubmit = (e) => {
-    console.log("clicked");
-
     e.preventDefault();
 
     const taskData = {
@@ -149,7 +155,6 @@ const NewTaskForm = ({ taskId }) => {
       owners: selectedOwner.map(({ value }) => value),
       completedAt: taskFormData.status === "Completed" ? Date.now() : null,
     };
-
     if (
       taskData.name &&
       taskData.project &&
@@ -160,7 +165,7 @@ const NewTaskForm = ({ taskId }) => {
       taskData.dueDate &&
       taskData.timeToComplete
     ) {
-      if (taskDetailsFetchState === "success" && isUpdateTask && taskId) {
+      if (isUpdateTask && taskId) {
         dispatch(updateTask({ taskId, updatedData: taskData }));
       } else {
         dispatch(createTask(taskData));
@@ -170,7 +175,7 @@ const NewTaskForm = ({ taskId }) => {
 
   return (
     <>
-      {teams.length > 0 && projects.length > 0 && (
+      {
         <div className="overlay">
           <div className="project-form rounded">
             <form onSubmit={handleTaskFormSubmit} className="">
@@ -215,7 +220,10 @@ const NewTaskForm = ({ taskId }) => {
                 className="form-select mb-2"
                 id="team-select"
                 name="team"
-                onChange={handleTaskForm}
+                onChange={(e) => {
+                  setManualTeamChange(true);
+                  handleTaskForm(e);
+                }}
                 required
               >
                 {teams?.toReversed().map(({ _id, name }) => {
@@ -328,7 +336,10 @@ const NewTaskForm = ({ taskId }) => {
                   Cancel
                 </button>
                 <button
-                  disabled={taskCreateState === "loading"}
+                  disabled={
+                    taskCreateState === "loading" ||
+                    taskUpdateState === "loading"
+                  }
                   className="btn btn-primary"
                 >
                   {isUpdateTask
@@ -343,7 +354,7 @@ const NewTaskForm = ({ taskId }) => {
             </form>
           </div>
         </div>
-      )}
+      }
     </>
   );
 };

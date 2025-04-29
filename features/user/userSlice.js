@@ -1,7 +1,7 @@
 import { createSlice,createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-const apiUrl = "https://workasanabe.vercel.app/api/auth"
+const apiUrl = "http://localhost:3000/api/auth"
 
 export const signupUser = createAsyncThunk("user/signup", async(userData) => {
   try {
@@ -104,6 +104,7 @@ const initialState = {
   userAllState: "idle",
   userAllMessage: null,
   userAllError: null,
+  expireTime:null
 };
 
 
@@ -144,7 +145,8 @@ const userSlice = createSlice({
     })
     builder.addCase(loginUser.fulfilled, (state,action) => {
       state.loginState = "success"
-      localStorage.setItem("accessToken",action.payload.token)
+      localStorage.setItem("accessToken", action.payload.token)
+      console.log(action.payload)
       state.loginMessage = action.payload.message
       state.loginError = null
     })
@@ -161,7 +163,8 @@ const userSlice = createSlice({
     })
     builder.addCase(fetchUser.fulfilled, (state,action) => {
       state.userState = "success"
-      state.user =action.payload.user
+      state.user = action.payload.user
+      localStorage.setItem("expireTime",JSON.stringify(action.payload))
       localStorage.setItem("user",JSON.stringify(action.payload.user))
       state.userMessage = action.payload.message || null
       state.userError = null

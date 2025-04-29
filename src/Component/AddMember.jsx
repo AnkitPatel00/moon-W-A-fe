@@ -84,7 +84,12 @@ const AddMember = () => {
               <button className="btn btn-secondary" onClick={handleFormCancel}>
                 Cancel
               </button>
-              <button className="btn btn-primary">Add</button>
+              <button
+                disabled={teamAddMemberState === "loading"}
+                className="btn btn-primary"
+              >
+                {teamAddMemberState === "loading" ? "Adding..." : "Add"}
+              </button>
             </div>
           </form>
         </div>

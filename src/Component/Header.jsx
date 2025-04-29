@@ -9,9 +9,16 @@ const Header = () => {
 
   const { user } = useSelector((state) => state.userState);
 
+  useEffect(() => {
+    if (!localStorage.getItem("accessToken")) {
+      dispatch(logoutUser());
+    }
+  }, []);
+
   const handleLogout = () => {
     dispatch(logoutUser());
     navigate("/login");
+    window.location.reload();
   };
 
   return (

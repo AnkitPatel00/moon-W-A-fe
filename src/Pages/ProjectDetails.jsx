@@ -7,7 +7,6 @@ import {
   fetchTaskbyId,
 } from "../../features/task/taskSlice";
 import TaskList from "../Component/TaskList";
-import { fetchAllUser } from "../../features/user/userSlice";
 import Loading from "../Component/Loading";
 
 const ProjectDetails = () => {
@@ -66,13 +65,15 @@ const ProjectDetails = () => {
     (state) => state.taskState
   );
 
-  const taskOwners = [
-    ...new Set(
-      tasksById
-        ?.flatMap((task) => task.owners)
-        .map((owner) => `${owner.name + "split" + owner._id}`)
-    ),
-  ].map((owner) => owner.split("split")[0]);
+  const taskOwners =
+    tasksById.length > 0 &&
+    [
+      ...new Set(
+        tasksById
+          ?.flatMap((task) => task.owners)
+          .map((owner) => `${owner.name + "split" + owner._id}`)
+      ),
+    ].map((owner) => owner.split("split")[0]);
 
   return (
     <>
@@ -106,13 +107,14 @@ const ProjectDetails = () => {
             onChange={(e) => setOwnerFilter(e.target.value)}
           >
             <option value={""}>All</option>
-            {taskOwners?.map((user) => {
-              return (
-                <option key={user} value={user}>
-                  {user}
-                </option>
-              );
-            })}
+            {taskOwners.length > 0 &&
+              taskOwners.map((user) => {
+                return (
+                  <option key={user} value={user}>
+                    {user}
+                  </option>
+                );
+              })}
           </select>
 
           <label htmlFor="task-owner-filter">SortByDate:</label>

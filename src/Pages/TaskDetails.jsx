@@ -23,17 +23,17 @@ const TaskDetails = () => {
 
   const {
     tasksDetailsById,
-    isTaskForm,
     isUpdateTask,
     taskUpdateState,
     taskDetailsFetchState,
+    taskCompUpdateState,
   } = useSelector((state) => state.taskState);
 
   useEffect(() => {
-    if (taskUpdateState === "success") {
+    if (taskUpdateState === "success" || taskCompUpdateState === "success") {
       dispatch(fetchTaskDetailsbyId(taskId));
     }
-  }, [taskUpdateState]);
+  }, [taskUpdateState, taskCompUpdateState]);
 
   const daysRemain = () => {
     const today = new Date();
@@ -53,7 +53,7 @@ const TaskDetails = () => {
       dispatch(
         completedTaskUpdate({
           ...updatedData,
-          completedAt: Date.now(),
+          completedAt: new Date().toISOString().split("T")[0],
           status: "Completed",
         })
       );
@@ -68,9 +68,18 @@ const TaskDetails = () => {
     }
   };
 
-  console.log(isUpdateTask);
+  // console.log(new Date(tasksDetailsById.completedAt).toISOString());
 
-  // console.log({ isTaskForm, isUpdateTask, tasksDetailsById, taskUpdateState });
+  // console.log(
+  //   tasksDetailsById.completedAt &&
+  //     new Date(tasksDetailsById?.completedAt).toISOString()
+  // );
+
+  const completedAt = tasksDetailsById?.completedAt;
+  const dateObject = new Date(completedAt);
+
+  const dueDate = tasksDetailsById?.dueDate;
+  const dueDateFormate = new Date(dueDate);
 
   return (
     <>
@@ -97,14 +106,14 @@ const TaskDetails = () => {
               })}
             </p>
             <p>
-              Due Date: <span>{tasksDetailsById.dueDate}</span>
+              Due Date: <span>{dueDateFormate.toDateString()}</span>
             </p>
 
             <p>
               Time Remaining:{" "}
               <span>
                 {tasksDetailsById.status === "Completed"
-                  ? `Completed at ${tasksDetailsById.completedAt}`
+                  ? `Completed at ${dateObject.toDateString()}`
                   : daysRemain() +
                     ` Days ( ${
                       daysRemain() > 0
@@ -132,7 +141,6 @@ const TaskDetails = () => {
 
             <button
               onClick={() => {
-                console.log("Clicked");
                 dispatch(setisUpdateTask(true));
               }}
               className="btn btn-primary mt-3"
@@ -142,15 +150,6 @@ const TaskDetails = () => {
           </>
         )}
       </div>
-
-      {/* {isUpdateTask && (
-        <>
-          <p>Working</p>
-          <button onClick={() => dispatch(setisUpdateTask(false))}>
-            Cancel
-          </button>
-        </>
-      )} */}
 
       {isUpdateTask && <NewTaskForm taskId={taskId} />}
     </>

@@ -1,4 +1,4 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { deleteTask } from "../../features/task/taskSlice";
 const TaskList = ({ tasks }) => {
@@ -8,9 +8,14 @@ const TaskList = ({ tasks }) => {
     dispatch(deleteTask(taskId));
   };
 
+  const { taskDeleteState } = useSelector((state) => state.taskState);
+
   return (
     <>
       {tasks?.toReversed().map((task) => {
+        const dueDate = task?.dueDate;
+        const dueDateFormate = new Date(dueDate);
+
         const statusBG =
           task.status === "To Do"
             ? "bg-secondary text-light"
@@ -32,24 +37,9 @@ const TaskList = ({ tasks }) => {
             <h5 className="fs-4">{task.name}</h5>
             <div className="d-flex align-items-center">
               {task.owners.slice(0, 3).map((owner, i) => {
-                const avatarColors = [
-                  "#f94144",
-                  "#f3722c",
-                  "#f9844a",
-                  "#43aa8b",
-                  "#577590",
-                  "#277da1",
-                ];
-
-                const getRandomColor = () => {
-                  return avatarColors[
-                    Math.floor(Math.random() * avatarColors.length)
-                  ];
-                };
-
                 return (
                   <div
-                    key={owner._id}
+                    key={owner._id || i}
                     className="rounded-circle border border-light text-bg-secondary d-flex justify-content-center align-items-center"
                     style={{
                       width: "40px",
@@ -81,7 +71,7 @@ const TaskList = ({ tasks }) => {
                 </div>
               )}
             </div>
-            <p>Due on: {task.dueDate}</p>
+            <p>Due on: {dueDateFormate.toDateString()}</p>
             <p></p>
             <Link
               className="btn btn-primary btn-sm"
@@ -91,10 +81,11 @@ const TaskList = ({ tasks }) => {
             </Link>
 
             <button
+              disabled={taskDeleteState === "loading" ? true : false}
               className="btn btn-danger btn-sm ms-3"
               onClick={() => handleTaskDelete(task._id)}
             >
-              Delete
+              {taskDeleteState === "loading" ? "Deleting..." : "Delete"}
             </button>
           </div>
         );

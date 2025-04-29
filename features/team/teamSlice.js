@@ -71,7 +71,6 @@ export const createTeams = createAsyncThunk("team/create", async(teamData) => {
 //add member to team
 
 export const addMembersToTeams = createAsyncThunk("teamMemeber/add", async (updateData) => {
-  console.log(updateData)
   try {
     const response = await axios.post(`${apiUrl}/member/${updateData.teamId}`,{members:updateData.members},{ headers: headers() })
       return response.data 
