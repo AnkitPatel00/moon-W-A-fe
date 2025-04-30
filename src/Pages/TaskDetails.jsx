@@ -101,7 +101,11 @@ const TaskDetails = () => {
             <p>
               Owners:{" "}
               {tasksDetailsById.owners.map((owner) => {
-                return <span key={owner._id}>{owner.name}</span>;
+                return (
+                  <span className="mx-2" key={owner._id}>
+                    {owner.name}
+                  </span>
+                );
               })}
             </p>
             <p>
