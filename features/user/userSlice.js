@@ -1,7 +1,7 @@
 import { createSlice,createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-const apiUrl = "http://localhost:3000/api/auth"
+const apiUrl = "https://workasana.up.railway.app/api/auth"
 
 export const signupUser = createAsyncThunk("user/signup", async(userData) => {
   try {
