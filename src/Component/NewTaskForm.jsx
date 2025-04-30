@@ -275,7 +275,7 @@ const NewTaskForm = ({ taskId }) => {
                 placeholder="Type and press Enter"
                 required
               />
-              <div className="d-flex justify-content-between mt-2">
+              <div className="d-flex justify-content-between mt-2 flex-wrap">
                 <div>
                   <label className="form-label">Select Due date</label>
                   <input
