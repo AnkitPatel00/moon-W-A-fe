@@ -82,7 +82,7 @@ const ProjectDetails = () => {
       <div>
         <h5>Task List</h5>
 
-        <div className="d-flex align-items-center mb-3">
+        <div className="d-flex align-items-center mb-3 flex-wrap">
           <label htmlFor="task-status-filter">Status Filter:</label>
           <select
             className="form-select mx-2"
