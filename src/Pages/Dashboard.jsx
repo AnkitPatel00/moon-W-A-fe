@@ -11,9 +11,9 @@ import { fetchTeams } from "../../features/team/teamSlice";
 import { fetchTask, setisTaskForm } from "../../features/task/taskSlice";
 import TaskList from "../Component/TaskList";
 import ProjectList from "../Component/ProjectList";
-import NewProjectForm from "../Component/newProjectForm";
 import NewTaskForm from "../Component/NewTaskForm";
 import Loading from "../Component/Loading";
+import NewProjectForm from "../Component/NewProjectForm";
 
 const Dashboard = () => {
   const dispatch = useDispatch();

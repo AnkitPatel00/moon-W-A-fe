@@ -7,8 +7,8 @@ import {
   setisProjectForm,
 } from "../../features/project/projectSlice";
 import { useSearchParams } from "react-router-dom";
-import NewProjectForm from "../Component/newProjectForm";
 import Loading from "../Component/Loading";
+import NewProjectForm from "../Component/NewProjectForm";
 
 const Project = () => {
   const dispatch = useDispatch();
