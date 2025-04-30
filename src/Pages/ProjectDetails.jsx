@@ -26,7 +26,7 @@ const ProjectDetails = () => {
 
   useEffect(() => {
     const params = new URLSearchParams();
-    if (projectId) params.set("projectId", projectId);
+    // if (projectId) params.set("projectId", projectId);
     if (status) params.set("taskStatus", status);
     if (ownerFilter) params.set("taskOwner", ownerFilter);
     if (sortBy) params.set("sortByDate", sortBy);
