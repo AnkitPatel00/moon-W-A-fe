@@ -83,9 +83,11 @@ const ProjectDetails = () => {
         <h5>Task List</h5>
 
         <div className="d-flex align-items-center mb-3 flex-wrap">
-          <label htmlFor="task-status-filter">Status Filter:</label>
+          <label htmlFor="task-status-filter" className="mb-3">
+            Status Filter:
+          </label>
           <select
-            className="form-select mx-2"
+            className="form-select mx-2 mb-3"
             style={{ width: "150px" }}
             id="task-status-filter"
             value={status}
@@ -98,9 +100,11 @@ const ProjectDetails = () => {
             <option value="Blocked">Blocked</option>
           </select>
 
-          <label htmlFor="task-owner-filter">Owner Filter:</label>
+          <label htmlFor="task-owner-filter" className="mb-3">
+            Owner Filter:
+          </label>
           <select
-            className="form-select mx-2"
+            className="form-select mx-2 mb-3"
             style={{ width: "150px" }}
             id="task-owner-filter"
             value={ownerFilter}
@@ -117,9 +121,11 @@ const ProjectDetails = () => {
               })}
           </select>
 
-          <label htmlFor="task-owner-filter">SortByDate:</label>
+          <label htmlFor="task-owner-filter" className="mb-3">
+            SortByDate:
+          </label>
           <select
-            className="form-select ms-2"
+            className="form-select ms-2 mb-3"
             style={{ width: "150px" }}
             id="task-owner-filter"
             value={sortBy}
