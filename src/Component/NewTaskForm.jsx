@@ -282,7 +282,6 @@ const NewTaskForm = ({ taskId }) => {
                     value={taskFormData.dueDate}
                     className="form-control mb-2"
                     type="date"
-                    placeholder="Select date"
                     name="dueDate"
                     onChange={handleTaskForm}
                     required
