@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../features/user/userSlice";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
 const Header = () => {
@@ -24,7 +24,11 @@ const Header = () => {
   return (
     <>
       <div className="bg-light d-flex justify-content-between align-items-center flex-wrap px-5">
-        <h1 className="display-5 text-center py-3">Workasana</h1>
+        <h1 className="display-5 text-center py-3">
+          <NavLink className="nav-link" to="/">
+            Workasana
+          </NavLink>
+        </h1>
 
         <div className="d-flex">
           <div
