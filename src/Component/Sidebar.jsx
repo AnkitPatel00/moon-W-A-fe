@@ -9,21 +9,23 @@ const Sidebar = () => {
       <ul className="navbar-nav fs-5">
         <li className="nav-item">
           <NavLink to="/" className="nav-link ">
+            <i className="fa-solid fa-bars-progress me-2"></i>
             Dashboard
           </NavLink>
         </li>
         <li className="nav-item">
           <NavLink to="/project" className="nav-link ">
-            Project
+            <i class="fa-solid fa-folder me-2"></i> Project
           </NavLink>
         </li>
         <li className="nav-item">
           <NavLink to="/team" className="nav-link ">
-            Team
+            <i className="fa-solid fa-headset me-2"></i> Team
           </NavLink>
         </li>
         <li className="nav-item">
           <NavLink to="/report" className="nav-link ">
+            <i className="fa-solid fa-chart-simple me-2"></i>
             Reports
           </NavLink>
         </li>
