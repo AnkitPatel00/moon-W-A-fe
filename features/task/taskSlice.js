@@ -1,7 +1,7 @@
 import { createSlice,createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-const apiUrl = "https://workasanabe.vercel.app/api/tasks"
+const apiUrl = "https://moon-w-a-be.onrender.com/api/tasks"
 
 const headers = () => {
   const obj = {
@@ -72,7 +72,7 @@ export const completedTaskUpdate = createAsyncThunk("taskCompleted/update", asyn
   console.log(updatedData)
 
   try {
-    const response = await axios.post(`https://workasanabe.vercel.app/api/tasks/complete/${updatedData.id}`,updatedData,{headers:headers()})
+    const response = await axios.post(`https://moon-w-a-be.onrender.com/api/tasks/complete/${updatedData.id}`,updatedData,{headers:headers()})
     return response.data
   }
   catch (error)
