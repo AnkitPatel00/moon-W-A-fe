@@ -14,6 +14,21 @@ import ProjectList from "../Component/ProjectList";
 import NewTaskForm from "../Component/NewTaskForm";
 import Loading from "../Component/Loading";
 import NewProjectForm from "../Component/NewProjectForm";
+import { Box, Typography, TextField, InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import {
+  PieChart,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Bar,
+  Pie,
+  Cell,
+  Legend,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -133,17 +148,127 @@ const Dashboard = () => {
     return () => clearTimeout(taskTimeout);
   }, [taskFilter]);
 
+  const projectStatusCount = projects?.reduce((acc, { status }) => {
+    acc[status] = (acc[status] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Convert to array for PieChart
+  const pieData = Object.entries(projectStatusCount).map(([status, value]) => ({
+    name: status,
+    value,
+  }));
+
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+
+  const tasksStatusCount = tasks.reduce((acc, { status }) => {
+    acc[status] = (acc[status] || 0) + 1;
+    return acc;
+  }, {});
+
+  const barData = Object.entries(tasksStatusCount).map(([status, value]) => ({
+    name: status,
+    count: value,
+  }));
+
   return (
     <>
-      <input
-        value={search}
-        className="form-control"
-        type="text"
-        placeholder="Search Project by Title"
-        onChange={handleSearch}
-      />
       <div className="my-4">
+        <div>
+          {/* Project Status Pie Chart */}
+          <Box mb={4}>
+            <Typography variant="h5" fontWeight={600} mb={2}>
+              Project Status Distribution
+            </Typography>
+            {pieData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <Typography>No project data for chart</Typography>
+            )}
+          </Box>
+        </div>
+        <div>
+          <Box mb={4}>
+            <Typography variant="h5" fontWeight={600} mb={2}>
+              Task Status Overview
+            </Typography>
+            {barData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={barData}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="count" fill="#1976d2">
+                    {barData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Typography>No task data for chart</Typography>
+            )}
+          </Box>
+        </div>
+
         <div className="d-flex justify-content-between align-items-center flex-wrap">
+          <div>
+            <TextField
+              value={search}
+              onChange={handleSearch}
+              placeholder="Search Project by Title"
+              fullWidth
+              variant="outlined"
+              size="small"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                backgroundColor: "#fff",
+                borderRadius: 2,
+                boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": { borderColor: "#ddd" },
+                  "&:hover fieldset": { borderColor: "#1976d2" },
+                  "&.Mui-focused fieldset": { borderColor: "#1976d2" },
+                },
+              }}
+            />
+          </div>
+
           <div className="d-flex align-items-center">
             <h5 className="mb-0 me-3 fs-4">Projects</h5>
             <label htmlFor="project-status-filter" className="me-3">
